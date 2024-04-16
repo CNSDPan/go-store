@@ -1,0 +1,83 @@
+version: "3.5"
+
+services:
+  k-1.19:
+    container_name: k-1.19
+    image: k-build
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+    restart: always
+    environment:
+      - TZ=${TZ}
+    tty: true
+    volumes:
+      - ${APP_PATH}/:${MOUNT_PATH}
+    networks:
+      kfc:
+        ipv4_address: 172.20.2.99
+  k-r-api:
+    container_name: k-r-api
+    image: debian:latest
+    ports:
+      - "8881:8080"
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${APP_PATH}/rpc/api/bin/rpc_api.bin:${MOUNT_PATH}/rpc_api.bin
+      - ${APP_PATH}/rpc/api/etc:${MOUNT_PATH}/etc
+      - ${APP_PATH}/tmp/:${MOUNT_PATH}/tmp
+      - ${APP_PATH}/yaml/:${MOUNT_PATH}/yaml
+      - ${APP_PATH}/common/:${MOUNT_PATH}/common
+    command: /bin/bash -c "cd /var/www/k&&./rpc_api.bin module service >> tmp/rpc-api.err"
+    networks:
+      kfc:
+        ipv4_address: 172.20.2.100
+  k-api:
+    container_name: k-api
+    #使用别人的构造器
+    image: debian:latest
+#    build:
+#      context: ${APP_PATH}
+#      dockerfile: api/Dockerfile
+    ports:
+      - "7000:8888"
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${APP_PATH}/api/bin/api.bin:${MOUNT_PATH}/api.bin
+      - ${APP_PATH}/api/etc:${MOUNT_PATH}/etc
+      - ${APP_PATH}/tmp/:${MOUNT_PATH}/tmp
+      - ${APP_PATH}/yaml/:${MOUNT_PATH}/yaml
+      - ${APP_PATH}/common/:${MOUNT_PATH}/common
+    command: /bin/bash -c "cd /var/www/k&&./api.bin module api >> tmp/api.err"
+    networks:
+      kfc:
+        ipv4_address: 172.20.2.101
+#  k-http:
+#    container_name: k-http
+#    #使用别人的构造器
+#    image: debian:latest
+#    #    build:
+#    #      context: ${APP_PATH}
+#    #      dockerfile: api/Dockerfile
+#    ports:
+#      - "7001:8888"
+#    environment:
+#      - TZ=${TZ}
+#    volumes:
+#      - ${APP_PATH}/http/bin/http.bin:${MOUNT_PATH}/http.bin
+#      - ${APP_PATH}/http/etc:${MOUNT_PATH}/etc
+#      - ${APP_PATH}/tmp/:${MOUNT_PATH}/tmp
+#    command: /bin/bash -c "cd /var/www/k&&./http.bin module http >> tmp/http.err"
+#    networks:
+#      kfc:
+#        ipv4_address: 172.20.2.102
+networks:
+  kfc:
+    name: kfc
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.2.0/24 #建议填写宿主机的网关
+          gateway: 172.20.2.1

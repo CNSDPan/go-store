@@ -1,0 +1,36 @@
+syntax = "v1"
+
+info (
+	title:   "api" // TODO: add title
+	desc:    "ther api here" // TODO: add description
+	author:  "ther desc here"
+	version: "v1.0.0"
+)
+
+type Request {}
+
+type Response {
+	Code         string      `json:"code"`
+	Message      string      `json:"message"`
+	ResponseTime string      `json:"responseTime"`
+	Data         interface{} `json:"data"`
+}
+
+type ReqUserIid {
+	Iid int64 `path:"iid"`
+}
+
+type ReqUserInfo {
+	Iid    int64  `json:"iid,string"`
+	Name   string `json:"name"`
+	CnName string `json:"cnName"`
+}
+
+service api {
+	@handler GetUser // TODO: set handler name and delete this comment
+	get /users/info/:iid (ReqUserIid) returns (Response)
+
+	@handler CreateUser // TODO: set handler name and delete this comment
+	post /users/create (Request)
+}
+

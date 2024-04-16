@@ -1,0 +1,17 @@
+Name: "store-db"
+# mysql读写分离： 1-读写分离（需要具备主从库）、2-单个数据库实例
+Separation: 2
+Master:
+  Host: "192.168.33.10"
+  Port: "3307"
+  User: "root"
+  Password: "root"
+  Database: "k"
+Slave:
+  Host:
+    - "192.168.33.10:13307"
+    - "192.168.33.10:13308"
+  User: "root"
+  Password: "root"
+  Database: "k"
+Charset: "utf8mb4"

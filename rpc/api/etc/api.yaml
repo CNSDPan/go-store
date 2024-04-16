@@ -1,0 +1,7 @@
+Name: api.rpc
+ListenOn: 0.0.0.0:8080
+Etcd:
+  Hosts:
+    - 192.168.33.10:20001
+    - 192.168.33.10:20003
+  Key: api.rpc

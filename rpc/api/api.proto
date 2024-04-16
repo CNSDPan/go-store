@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package api;
+option go_package="./api";
+
+// 用户
+message ReqUser {
+  int64 iid = 1;
+  string name = 2;
+}
+message ResUser {
+  int64 iid = 1 ;
+  string name = 2;
+  string cnName = 3;
+  int32 age = 4 ;
+}
+service User {
+  rpc GetUser(ReqUser) returns(ResUser);
+}
+
+
+// 角色服务
+message ReqRolesReq{}
+message ReqRolesRes{}
+service Roles {
+  rpc GetRolesList(ReqRolesReq) returns(ReqRolesRes);
+}

@@ -1,0 +1,13 @@
+version: "3.5"
+
+services:
+  k-build:
+    container_name: k-build
+    image: k-build
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    volumes:
+      - ${APP_PATH}/:${MOUNT_PATH}
