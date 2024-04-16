@@ -3,7 +3,7 @@ package types
 import (
 	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
-	"k/common"
+	"store/common"
 	"time"
 )
 

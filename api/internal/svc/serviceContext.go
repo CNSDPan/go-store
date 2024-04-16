@@ -1,8 +1,8 @@
 package svc
 
 import (
-	"k/api/internal/config"
-	"k/rpc/api/pb/api"
+	"store/api/internal/config"
+	"store/rpc/api/pb/api"
 )
 
 type ServiceContext struct {

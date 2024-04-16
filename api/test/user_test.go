@@ -1,11 +1,11 @@
 package test
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
-	"gopkg.in/square/go-jose.v2/json"
-	"k/api/internal/types"
-	"k/rpc/api/pb/api"
+	"store/api/internal/types"
+	"store/rpc/api/pb/api"
 	"testing"
 )
 

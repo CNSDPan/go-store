@@ -4,9 +4,9 @@ import (
 	"net/http"
 
 	"github.com/zeromicro/go-zero/rest/httpx"
-	"k/api/internal/logic"
-	"k/api/internal/svc"
-	"k/api/internal/types"
+	"store/api/internal/logic"
+	"store/api/internal/svc"
+	"store/api/internal/types"
 )
 
 func CreateUserHandler(svcCtx *svc.ServiceContext) http.HandlerFunc {

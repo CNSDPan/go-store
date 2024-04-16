@@ -22,7 +22,7 @@ services:
       - "20002:2380"
     tty: true
     networks:
-      kfc:
+      store:
         ipv4_address: 172.20.2.201
   etcd2:
     image: "bitnami/etcd:3.5.0"
@@ -45,7 +45,7 @@ services:
       - "20004:2380"
     tty: true
     networks:
-      kfc:
+      store:
         ipv4_address: 172.20.2.202
   etcdkeeper:
     image: deltaprojects/etcdkeeper
@@ -58,9 +58,9 @@ services:
       - etcd1
       - etcd2
     networks:
-      kfc:
+      store:
         ipv4_address: 172.20.2.200
 networks:
-  kfc:
-    name: kfc
+  store:
+    name: store
     driver: bridge

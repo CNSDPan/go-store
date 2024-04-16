@@ -6,9 +6,9 @@ package server
 import (
 	"context"
 
-	"k/rpc/api/internal/logic/roles"
-	"k/rpc/api/internal/svc"
-	"k/rpc/api/pb/api"
+	"store/rpc/api/internal/logic/roles"
+	"store/rpc/api/internal/svc"
+	"store/rpc/api/pb/api"
 )
 
 type RolesServer struct {

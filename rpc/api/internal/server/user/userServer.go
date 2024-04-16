@@ -6,9 +6,9 @@ package server
 import (
 	"context"
 
-	"k/rpc/api/internal/logic/user"
-	"k/rpc/api/internal/svc"
-	"k/rpc/api/pb/api"
+	"store/rpc/api/internal/logic/user"
+	"store/rpc/api/internal/svc"
+	"store/rpc/api/pb/api"
 )
 
 type UserServer struct {

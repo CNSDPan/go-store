@@ -4,10 +4,10 @@ import (
 	"context"
 	"errors"
 	"github.com/zeromicro/go-zero/core/logx"
-	"k/api/internal/svc"
-	"k/api/internal/types"
-	"k/common"
-	"k/rpc/api/pb/api"
+	"store/api/internal/svc"
+	"store/api/internal/types"
+	"store/common"
+	"store/rpc/api/pb/api"
 )
 
 type GetUserLogic struct {

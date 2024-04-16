@@ -3,8 +3,8 @@ package userlogic
 import (
 	"context"
 
-	"k/rpc/api/internal/svc"
-	"k/rpc/api/pb/api"
+	"store/rpc/api/internal/svc"
+	"store/rpc/api/pb/api"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

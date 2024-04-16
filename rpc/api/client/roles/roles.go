@@ -6,7 +6,7 @@ package roles
 import (
 	"context"
 
-	"k/rpc/api/pb/api"
+	"store/rpc/api/pb/api"
 
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"

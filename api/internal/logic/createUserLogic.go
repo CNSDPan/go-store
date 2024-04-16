@@ -3,8 +3,8 @@ package logic
 import (
 	"context"
 
-	"k/api/internal/svc"
-	"k/api/internal/types"
+	"store/api/internal/svc"
+	"store/api/internal/types"
 
 	"github.com/zeromicro/go-zero/core/logx"
 )

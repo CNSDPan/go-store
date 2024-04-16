@@ -1,8 +1,8 @@
 package test
 
 import (
-	"k/gorm"
-	"k/yaml"
+	"store/gorm"
+	"store/yaml"
 	"testing"
 )
 

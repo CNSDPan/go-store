@@ -6,11 +6,11 @@ import (
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
 	"github.com/zeromicro/go-zero/zrpc"
-	"k/api/internal/config"
-	"k/api/internal/handler"
-	"k/api/internal/svc"
-	"k/rpc/api/pb/api"
-	"k/yaml"
+	"store/api/internal/config"
+	"store/api/internal/handler"
+	"store/api/internal/svc"
+	"store/rpc/api/pb/api"
+	"store/yaml"
 )
 
 var configFile = flag.String("c-f", "etc/api.yaml", "the config file")

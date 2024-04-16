@@ -1,5 +1,5 @@
 #!/bin/bash
-docker exec k-1.19 /bin/bash -c "sh /var/www/k/build/dev-build.sh"
+docker exec go1.19 /bin/bash -c "sh /var/www/store/build/dev-build.sh"
 #重启容器
-docker restart k-api
-docker restart k-r-api
+docker restart api
+docker restart rpc-api

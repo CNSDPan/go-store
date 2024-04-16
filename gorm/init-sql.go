@@ -5,7 +5,7 @@ import (
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"k/yaml"
+	"store/yaml"
 	"time"
 )
 
@@ -41,11 +41,11 @@ func initDB(c *yaml.MysqlConf) {
 		DSN: dsn,
 	}), &gorm.Config{})
 	if err != nil {
-		panic("数据库初始化失败")
+		panic("单个数据库实例初始化失败")
 	}
 	db, e := dbConn.DB()
 	if e != nil {
-		panic("获取 数据库 实例失败")
+		panic("单个数据库实例: 获取 数据库 实例失败")
 	}
 	// SetMaxIdleConns 设置空闲连接池中连接的最大数量
 	db.SetMaxIdleConns(10)

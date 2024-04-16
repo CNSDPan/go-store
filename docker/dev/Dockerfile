@@ -1,7 +1,7 @@
 FROM golang:1.19
 ENV GO111MODULE=on
 ENV GOPROXY=https://goproxy.cn,direct
-WORKDIR /var/www/k
+WORKDIR /var/www/store
 
 #COPY go.mod .
 #COPY go.sum .

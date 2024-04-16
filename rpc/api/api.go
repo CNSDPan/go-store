@@ -4,11 +4,11 @@ import (
 	"flag"
 	"fmt"
 
-	"k/rpc/api/internal/config"
-	rolesServer "k/rpc/api/internal/server/roles"
-	userServer "k/rpc/api/internal/server/user"
-	"k/rpc/api/internal/svc"
-	"k/rpc/api/pb/api"
+	"store/rpc/api/internal/config"
+	rolesServer "store/rpc/api/internal/server/roles"
+	userServer "store/rpc/api/internal/server/user"
+	"store/rpc/api/internal/svc"
+	"store/rpc/api/pb/api"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/service"
