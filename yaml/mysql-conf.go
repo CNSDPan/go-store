@@ -6,25 +6,16 @@ import (
 )
 
 type MysqlConf struct {
-	Name       string       `json:",optional"`
-	Separation int          `json:",optional"`
-	MasterDB   MasterDBConf `json:",optional,inherit"`
-	SlaveDB    SlaveDBConf  `json:",optional,inherit"`
-	Charset    string       `json:",optional"`
+	Name       string      `json:",optional"`
+	Separation int         `json:",optional"`
+	MasterDB   string      `json:",optional"`
+	SlaveDB    SlaveDBConf `json:",optional,inherit"`
+	Charset    string      `json:",optional"`
 }
-type MasterDBConf struct {
-	Host     string `json:",optional"`
-	Port     string `json:",optional"`
-	User     string `json:",optional"`
-	Password string `json:",optional"`
-	Database string `json:",optional"`
-}
+
 type SlaveDBConf struct {
-	Host     []string `json:",optional"`
-	Port     string   `json:",optional"`
-	User     string   `json:",optional"`
-	Password string   `json:",optional"`
-	Database string   `json:",optional"`
+	Tag     []string `json:",optional"`
+	Connect []string `json:",optional"`
 }
 
 var ReadMysqlCon *MysqlConf
