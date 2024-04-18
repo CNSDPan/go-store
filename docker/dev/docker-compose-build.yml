@@ -1,0 +1,13 @@
+version: "3.5"
+
+services:
+  go1.19-build:
+    container_name: go1.19-build
+    image: go1.19-build
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    tty: true
+    volumes:
+      - ${PRO_PATH}/:${MOUNT_PRO_PATH}
