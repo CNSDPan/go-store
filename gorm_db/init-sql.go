@@ -17,7 +17,7 @@ var dbMysql = map[string]*gorm.DB{}
 var dbRWMysql = map[string]*gorm.DB{}
 
 func init() {
-	c := yaml.ReadMysqlCon
+	c := yaml.RWMysqlCon
 	ctx := context.Background()
 	logg := logx.WithContext(ctx)
 	logg.Infof("%s mysql connect db init...", c.Name)
