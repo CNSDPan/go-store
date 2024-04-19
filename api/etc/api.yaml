@@ -1,3 +1,6 @@
 Name: api
 Host: 0.0.0.0
 Port: 8888
+
+#ServiceId must be between 0 and 1023
+ServiceId: "200" #api接口类型服务ID范围 200-299

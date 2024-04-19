@@ -2,7 +2,7 @@ CREATE TABLE `users` (
  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
  `user_id` bigint(20) NOT NULL COMMENT '用户IID',
  `token` varchar(18)  DEFAULT '' COMMENT 'token',
- `status` tinyint(1) DEFAULT '1' COMMENT '1=启用 0=禁用',
+ `status` tinyint(1) DEFAULT '1' COMMENT '1=启用 2=禁用',
  `name` varchar(50)  DEFAULT '' COMMENT '昵称',
  `fund` bigint(20) unsigned DEFAULT '0' COMMENT '用户资金,入库*1000【1000 = 1元】',
  `created_at` datetime(3) DEFAULT NULL COMMENT '创建时间',

@@ -3,7 +3,10 @@ module store
 go 1.19
 
 require (
+	github.com/bwmarrin/snowflake v0.3.0
 	github.com/imdario/mergo v0.3.6
+	github.com/segmentio/ksuid v1.0.4
+	github.com/shopspring/decimal v1.4.0
 	github.com/zeromicro/go-zero v1.6.4
 	google.golang.org/grpc v1.63.2
 	google.golang.org/protobuf v1.33.0

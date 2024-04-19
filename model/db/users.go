@@ -7,11 +7,21 @@ import (
 	"time"
 )
 
+const (
+	USER_STATUS_1 int8 = 1
+	USER_STATUS_2 int8 = 2
+)
+
+var StatusName = map[int8]string{
+	USER_STATUS_1: "启用",
+	USER_STATUS_2: "禁用",
+}
+
 type Users struct {
 	ID        uint32    `gorm:"primaryKey;column:id" json:"-"`
 	UserID    int64     `gorm:"column:user_id" json:"userId"`       // 用户IID
 	Token     string    `gorm:"column:token" json:"token"`          // token
-	Status    bool      `gorm:"column:status" json:"status"`        // 1=启用 0=禁用
+	Status    int8      `gorm:"column:status" json:"status"`        // 1=启用 2=禁用
 	Name      string    `gorm:"column:name" json:"name"`            // 昵称
 	Fund      uint64    `gorm:"column:fund" json:"fund"`            // 用户资金,入库*1000【1000 = 1元】
 	CreatedAt time.Time `gorm:"column:created_at" json:"createdAt"` // 创建时间
