@@ -18,7 +18,7 @@ type SlaveDBConf struct {
 	Connect []string `json:",optional"`
 }
 
-var ReadMysqlCon *MysqlConf
+var RWMysqlCon *MysqlConf
 
 const (
 	SEPARATION_YES = 1
@@ -38,5 +38,5 @@ func init() {
 
 	var c MysqlConf
 	conf.MustLoad(*mysqlFile, &c)
-	ReadMysqlCon = &c
+	RWMysqlCon = &c
 }

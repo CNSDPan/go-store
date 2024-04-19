@@ -11,6 +11,7 @@ services:
       TZ: "Asia/Shanghai"
       MYSQL_ROOT_HOST: "%"
     volumes:
+      - ${SQL_MYSQL}:/data/mysql/
       - ${MASTER_MYSQL}/my.cnf:/etc/mysql/my.cnf
     networks:
       store:
