@@ -1,4 +1,4 @@
-CREATE TABLE `main_order` (
+CREATE TABLE `order` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
   `order_id` bigint(20) NOT NULL COMMENT '订单编号',
   `status` tinyint(2) unsigned DEFAULT '1' COMMENT '订单状态：1-待支付、11-取消订单、12-失效订单、20-已完成',

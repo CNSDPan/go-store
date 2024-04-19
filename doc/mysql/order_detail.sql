@@ -1,4 +1,4 @@
-CREATE TABLE `purchase_order_detail` (
+CREATE TABLE `order_detail` (
  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
  `detail_id` bigint(20) NOT NULL COMMENT '明细编号IID',
  `order_id` bigint(20) DEFAULT '0' COMMENT '订单编号IID',
