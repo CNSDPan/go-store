@@ -1,12 +1,11 @@
 package test
 
 import (
-	"store/gorm"
 	"store/yaml"
 	"testing"
 )
 
-var db = gorm.GetReadDB(yaml.ReadMysqlCon.Name)
+var db = gorm_db.GetReadDB(yaml.ReadMysqlCon.Name)
 
 func TestInitMysql(t *testing.T) {
 
