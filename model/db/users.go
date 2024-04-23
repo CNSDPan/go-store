@@ -4,7 +4,6 @@ import (
 	"context"
 	"store/gorm_db"
 	"store/yaml"
-	"time"
 )
 
 const (
@@ -18,14 +17,14 @@ var StatusName = map[int8]string{
 }
 
 type Users struct {
-	ID        uint32    `gorm:"primaryKey;column:id" json:"-"`
-	UserID    int64     `gorm:"column:user_id" json:"userId"`       // 用户IID
-	Token     string    `gorm:"column:token" json:"token"`          // token
-	Status    int8      `gorm:"column:status" json:"status"`        // 1=启用 2=禁用
-	Name      string    `gorm:"column:name" json:"name"`            // 昵称
-	Fund      uint64    `gorm:"column:fund" json:"fund"`            // 用户资金,入库*1000【1000 = 1元】
-	CreatedAt time.Time `gorm:"column:created_at" json:"createdAt"` // 创建时间
-	UpdatedAt time.Time `gorm:"column:updated_at" json:"updatedAt"` // 更新时间
+	ID        uint32 `gorm:"primaryKey;column:id" json:"-"`
+	UserID    int64  `gorm:"column:user_id" json:"userId"`       // 用户IID
+	Token     string `gorm:"column:token" json:"token"`          // token
+	Status    int8   `gorm:"column:status" json:"status"`        // 1=启用 2=禁用
+	Name      string `gorm:"column:name" json:"name"`            // 昵称
+	Fund      int64  `gorm:"column:fund" json:"fund"`            // 用户资金,入库*1000【1000 = 1元】
+	CreatedAt string `gorm:"column:created_at" json:"createdAt"` // 创建时间
+	UpdatedAt string `gorm:"column:updated_at" json:"updatedAt"` // 更新时间
 }
 
 type _UsersMgr struct {

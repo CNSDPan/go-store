@@ -2,6 +2,7 @@ package gorm_db
 
 import (
 	"context"
+	"fmt"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -90,6 +91,8 @@ func initRWDB(c *yaml.MysqlConf, logg logx.Logger) {
 		Policy:   dbresolver.RandomPolicy{},
 	}).SetMaxIdleConns(10).SetMaxOpenConns(100).SetConnMaxLifetime(time.Hour))
 
+	dbRWMysql[c.Name] = dbConn
+
 	// 还有更加高级用法参考gorm官方文档-高级主题--Resolver,可设置规定的表或struct切换不同的连接使用
 	// 当Register()内填入映射的数据库结构体 | 表名时,查询user | roles 数据会通过 slave2 的连接池去查询,不会通过 slave1去查
 	//dbConn.Use(dbresolver.Register(dbresolver.Config{
@@ -108,10 +111,22 @@ func initRWDB(c *yaml.MysqlConf, logg logx.Logger) {
 // @param：dbName
 // @return：db | nil
 func GetReadDB(dbName string) (db *gorm.DB) {
+	fmt.Printf("dbName %v", dbName)
 	var ok bool
-	if db, ok = dbMysql[dbName]; ok {
-		return db
-	} else {
-		return nil
+	if yaml.RWMysqlCon.Separation == yaml.SEPARATION_YES {
+		db, ok = dbRWMysql[dbName]
+		if ok {
+			return db
+		} else {
+			return nil
+		}
+	} else if yaml.RWMysqlCon.Separation == yaml.SEPARATION_NO {
+		db, ok = dbMysql[dbName]
+		if ok {
+			return db
+		} else {
+			return nil
+		}
 	}
+	return nil
 }

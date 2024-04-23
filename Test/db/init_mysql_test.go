@@ -19,7 +19,7 @@ func init() {
 	var nodeId int64
 	var node *snowflake.Node
 	var db = gorm_db.GetReadDB(yaml.RWMysqlCon.Name)
-	nodeId, err = strconv.ParseInt(ServiceIdRpc, 2, 64)
+	nodeId, err = strconv.ParseInt(ServiceIdRpc, 0, 64)
 	if err != nil {
 		panic("转换 64位整形失败 " + err.Error())
 	}

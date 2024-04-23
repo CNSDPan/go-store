@@ -9,11 +9,11 @@ import "github.com/shopspring/decimal"
 // @param：price 只支持 int | int8 | int32 | int64 | float32 | float64
 // @return：dbPrice
 func EnterExchange(price interface{}) (dbPrice int64) {
-	var rate int64 = 1000
+	var rate int64 = 10000
 	switch price.(type) {
 	case int:
-		newPrice, _ := price.(int64)
-		dbPrice = decimal.NewFromInt(newPrice).Mul(decimal.NewFromInt(rate)).IntPart()
+		newPrice, _ := price.(int)
+		dbPrice = decimal.NewFromInt(int64(newPrice)).Mul(decimal.NewFromInt(rate)).IntPart()
 	case int8:
 		newPrice, _ := price.(int8)
 		dbPrice = decimal.NewFromInt(int64(newPrice)).Mul(decimal.NewFromInt(rate)).IntPart()
@@ -31,4 +31,15 @@ func EnterExchange(price interface{}) (dbPrice int64) {
 		dbPrice = decimal.NewFromFloat(newPrice).Mul(decimal.NewFromInt(rate)).IntPart()
 	}
 	return dbPrice
+}
+
+// OutExchange
+// @Auth：parker
+// @Desc：统一出库金额显示转换，将 数据表 的 金额 / 10000
+// @Date：2024-04-23 17:32:40
+// @param：price
+func OutExchange(dbPrice int64) (price float64) {
+	var rate int64 = 10000
+	price = decimal.NewFromInt(dbPrice).Sub(decimal.NewFromInt(rate)).InexactFloat64()
+	return price
 }
