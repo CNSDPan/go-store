@@ -27,6 +27,17 @@ type Users struct {
 	UpdatedAt string `gorm:"column:updated_at" json:"updatedAt"` // 更新时间
 }
 
+type UserApi struct {
+	ID        uint32 `gorm:"primaryKey;column:id" json:"-"`
+	UserID    int64  `gorm:"column:user_id" json:"userId,string"`       // 用户IID
+	Token     string `gorm:"column:token" json:"token,string"`          // token
+	Status    int8   `gorm:"column:status" json:"status,string"`        // 1=启用 2=禁用
+	Name      string `gorm:"column:name" json:"name,string"`            // 昵称
+	Fund      int64  `gorm:"column:fund" json:"fund,string"`            // 用户资金,入库*1000【1000 = 1元】
+	CreatedAt string `gorm:"column:created_at" json:"createdAt,string"` // 创建时间
+	UpdatedAt string `gorm:"column:updated_at" json:"updatedAt,string"` // 更新时间
+}
+
 type _UsersMgr struct {
 	*_BaseMgr
 }
