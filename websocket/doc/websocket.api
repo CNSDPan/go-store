@@ -1,0 +1,16 @@
+syntax = "v1"
+
+info (
+	title:   "websocket" // TODO: add title
+	desc:    "ther desc here" // TODO: add description
+	author:  "ther author here"
+	version: "v1.0.0"
+)
+
+type response {}
+
+service websocket-api {
+	@handler TestConn // TODO: set handler name and delete this comment
+	get /conn/test returns (response)
+}
+

@@ -47,19 +47,19 @@ services:
     networks:
       store:
         ipv4_address: 172.20.2.202
-  etcdkeeper:
-    image: deltaprojects/etcdkeeper
-    container_name: etcdkeeper
-    environment:
-      - TZ-Asia/Shanghai
-    ports:
-      - "20080:8080"
-    depends_on:
-      - etcd1
-      - etcd2
-    networks:
-      store:
-        ipv4_address: 172.20.2.200
+#  etcdkeeper:
+#    image: deltaprojects/etcdkeeper
+#    container_name: etcdkeeper
+#    environment:
+#      - TZ-Asia/Shanghai
+#    ports:
+#      - "20080:8080"
+#    depends_on:
+#      - etcd1
+#      - etcd2
+#    networks:
+#      store:
+#        ipv4_address: 172.20.2.200
 networks:
   store:
     name: store
