@@ -2,9 +2,10 @@ package db
 
 import (
 	"fmt"
-	"github.com/segmentio/ksuid"
-	"store/common"
+	"golang.org/x/text/encoding/simplifiedchinese"
+	"os/exec"
 	"store/model/db"
+	"store/tools"
 	"strconv"
 	"testing"
 	"time"
@@ -12,18 +13,26 @@ import (
 
 func TestCreateUser(t *testing.T) {
 	users := []db.Users{}
-	k := ksuid.New()
 	for i := 1; i < 6; i++ {
+		cmd := exec.Command("ksuid")
+		output, err := cmd.Output()
+		if err != nil {
+			panic(err)
+		}
+		output, err = simplifiedchinese.GB18030.NewDecoder().Bytes(output)
+		if err != nil {
+			panic(err)
+		}
+		uuid := DBModel.Node.Generate().Int64()
 		users = append(users, db.Users{
-			UserID:    DBModel.Node.Generate().Int64(),
-			Token:     k.Next().String(),
+			UserID:    uuid,
+			Token:     string(output),
 			Status:    db.USER_STATUS_1,
 			Name:      "用户" + strconv.Itoa(i),
-			Fund:      common.EnterExchange(1000),
+			Fund:      tools.EnterExchange(1000),
 			CreatedAt: time.Now().Format("2006-01-02 15:04:05"),
 			UpdatedAt: time.Now().Format("2006-01-02 15:04:05"),
 		})
-
 	}
 	fmt.Printf("%v \r\n", users)
 	res := DBModel.DB.Create(&users)

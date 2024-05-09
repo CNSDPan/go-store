@@ -2,6 +2,7 @@ package socket
 
 import (
 	"fmt"
+	"store/tools"
 	"strconv"
 	"testing"
 	"time"
@@ -23,8 +24,13 @@ func TestSystemClient(t *testing.T) {
 		b.routines[i] = c
 		go goCh(c)
 	}
-	//time.Sleep(2 * time.Second)
+	str, err := tools.Encrypt([]byte("172.20.2.111:6901"), []byte("Adba723b7fe06819"))
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("%s \r\n", str)
 	for i := 1; i < 4; i++ {
+
 		b.routines[i] <- &Ch{Msg: "好呀你是：" + strconv.Itoa(i)}
 	}
 	time.Sleep(10 * time.Second)
