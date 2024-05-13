@@ -2,6 +2,7 @@ package socket
 
 import (
 	"fmt"
+	"github.com/bwmarrin/snowflake"
 	"store/tools"
 	"strconv"
 	"testing"
@@ -14,6 +15,29 @@ type Ch struct {
 
 type Bucket struct {
 	routines []chan *Ch
+}
+
+func TestClientId(t *testing.T) {
+	serverId := "299"
+	fmt.Printf("server id %v \r\n", serverId)
+	nodeId, err := strconv.ParseInt(serverId, 10, 64)
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	node, e := snowflake.NewNode(nodeId)
+	if e != nil {
+		fmt.Println(e)
+		return
+	}
+	for i := 0; i < 10; i++ {
+		cliendId := node.Generate().String()
+		c, e1 := tools.Encrypt([]byte(cliendId), []byte("Adba723b7fe06819"))
+		if e1 != nil {
+			panic(e1)
+		}
+		fmt.Printf("%v %v\r\n", cliendId, c)
+	}
 }
 
 func TestSystemClient(t *testing.T) {

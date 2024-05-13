@@ -1,0 +1,8 @@
+#rpc-websocket 的server配置选项
+Name: websocket-api
+ListenOn: 0.0.0.0:7000
+Etcd:
+  Hosts:
+    - 192.168.33.10:20001
+    - 192.168.33.10:20003
+  Key: websocket.rpc

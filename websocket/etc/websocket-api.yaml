@@ -1,14 +1,7 @@
 Name: websocket-api
 Host: 0.0.0.0
-Port: 8888
+Port: 7000
 #对称加密key
 CryptoKey: "Adba723b7fe06819"
-Websocket:
-  - "172.20.2.111:6901"
-  - "172.20.2.111:6902"
-ListenOn: 0.0.0.0:8080
-Etcd:
-  Hosts:
-    - 192.168.33.10:20001
-    - 192.168.33.10:20003
-  Key: api.rpc
+#ServiceId must be between 0 and 1023
+ServiceId: "290" #GRPC服务ID的范围区间 290-299
