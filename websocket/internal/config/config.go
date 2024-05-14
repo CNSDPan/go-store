@@ -6,5 +6,6 @@ import (
 
 type Config struct {
 	rest.RestConf
-	ServiceId string `json:"serviceId,optional"`
+	ServiceId    string `json:",optional"`
+	BucketNumber uint   `json:",optional"`
 }

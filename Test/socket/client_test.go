@@ -5,6 +5,7 @@ import (
 	"github.com/bwmarrin/snowflake"
 	"store/tools"
 	"strconv"
+	"sync/atomic"
 	"testing"
 	"time"
 )
@@ -14,7 +15,8 @@ type Ch struct {
 }
 
 type Bucket struct {
-	routines []chan *Ch
+	routines    []chan *Ch
+	routinesNum uint64
 }
 
 func TestClientId(t *testing.T) {
@@ -43,7 +45,7 @@ func TestClientId(t *testing.T) {
 func TestSystemClient(t *testing.T) {
 	var b = new(Bucket)
 	b.routines = make([]chan *Ch, 10)
-	for i := 1; i < 4; i++ {
+	for i := 1; i < 5; i++ {
 		c := make(chan *Ch, 20)
 		b.routines[i] = c
 		go goCh(c)
@@ -53,11 +55,12 @@ func TestSystemClient(t *testing.T) {
 		panic(err)
 	}
 	fmt.Printf("%s \r\n", str)
-	for i := 1; i < 4; i++ {
-
-		b.routines[i] <- &Ch{Msg: "好呀你是：" + strconv.Itoa(i)}
+	for i := 1; i < 5; i++ {
+		num := atomic.AddUint64(&b.routinesNum, 1) % uint64(32)
+		fmt.Printf("num %d \r\n", num)
+		b.routines[num] <- &Ch{Msg: "好呀你是：" + strconv.FormatUint(num, 10)}
 	}
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
 	fmt.Println("结束了")
 }
 

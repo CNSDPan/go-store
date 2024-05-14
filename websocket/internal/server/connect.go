@@ -42,5 +42,6 @@ func (c *Connect) Run(w http.ResponseWriter, r *http.Request) {
 	ws.SetReadLimit(MaxMessageSize)
 
 	clientId := c.Node.Generate().Int64()
-	//c := &connection{}
+	clientChannle := NewClient(clientId, ws)
+
 }
