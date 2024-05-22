@@ -8,3 +8,5 @@ ServiceId: "290" #GRPC服务ID的范围区间 290-299
 
 #连接池水桶数量
 BucketNumber: 4
+#client给前端发起ping的时长
+PingPeriod: 30

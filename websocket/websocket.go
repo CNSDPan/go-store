@@ -11,6 +11,7 @@ import (
 	"store/websocket/internal/server"
 	"store/websocket/internal/svc"
 	"strconv"
+	"time"
 
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/rest"
@@ -48,6 +49,7 @@ func main() {
 	webServer.ServerId = c.ServiceId
 	webServer.Log = logx.WithContext(context.Background())
 	webServer.Node = node
+	webServer.Conf.PingPeriod = time.Duration(c.PingPeriod) * time.Second
 	// 启动websocket服务
 	webServer.StartWebsocket()
 

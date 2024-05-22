@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"store/websocket/internal/types"
 	"sync"
+	"time"
 )
 
 type Server struct {
@@ -14,6 +15,10 @@ type Server struct {
 	ServerId  string
 	Log       logx.Logger
 	Node      *snowflake.Node
+	Conf      ServerConf
+}
+type ServerConf struct {
+	PingPeriod time.Duration
 }
 
 type Bucket struct {
@@ -39,7 +44,9 @@ func NewServer() *Server {
 // @receiver：s
 func (s *Server) StartWebsocket() {
 	websocket := NewConnect(s.ServerId, s.Node)
-	http.HandleFunc("/ws", websocket.Run)
+	http.HandleFunc("/ws", func(writer http.ResponseWriter, request *http.Request) {
+		websocket.Run(writer, request, s)
+	})
 }
 
 // NewBuckets
@@ -58,4 +65,32 @@ func NewBuckets(bucketNumber uint) []*Bucket {
 		}
 	}
 	return buckets
+}
+
+// writeMessage
+// @Auth：parker
+// @Desc：写消息的
+// @Date：2024-05-22 15:47:30
+// @receiver：s
+func (s *Server) writeChannel(client *Client) {
+	// ping前端的时隔
+	ticker := time.NewTicker(s.Conf.PingPeriod)
+	defer func() {
+		ticker.Stop()
+	}()
+	for {
+		select {
+		case <-ticker.C:
+
+		}
+	}
+}
+
+// writeMessage
+// @Auth：parker
+// @Desc：读消息的
+// @Date：2024-05-22 15:47:30
+// @receiver：s
+func (s *Server) readChannel(client *Client) {
+
 }

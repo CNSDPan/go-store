@@ -24,10 +24,10 @@ func NewConnect(serverId string, node *snowflake.Node) *Connect {
 	}
 }
 
-func (c *Connect) Run(w http.ResponseWriter, r *http.Request) {
+func (c *Connect) Run(w http.ResponseWriter, r *http.Request, webServer *Server) {
 	c.Logger = logx.WithContext(r.Context())
 
-	ws, err := (&websocket.Upgrader{
+	wsConn, err := (&websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
@@ -39,9 +39,12 @@ func (c *Connect) Run(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	ws.SetReadLimit(MaxMessageSize)
+	wsConn.SetReadLimit(MaxMessageSize)
 
 	clientId := c.Node.Generate().Int64()
-	clientChannle := NewClient(clientId, ws)
+	clientChannle := NewClient(clientId, wsConn)
 
+	// 每个连接单独一个读写消息,避免消息拥挤
+	go webServer.writeChannel(clientChannle)
+	go webServer.readChannel(clientChannle)
 }
