@@ -5,16 +5,14 @@ import (
 	"flag"
 	"fmt"
 	"github.com/bwmarrin/snowflake"
+	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/zeromicro/go-zero/rest"
 	"store/websocket/internal/config"
 	"store/websocket/internal/handler"
 	"store/websocket/internal/server"
 	"store/websocket/internal/svc"
 	"strconv"
-	"time"
-
-	"github.com/zeromicro/go-zero/core/conf"
-	"github.com/zeromicro/go-zero/rest"
 )
 
 var configFile = flag.String("f", "etc/websocket-api.yaml", "the config file")
@@ -49,7 +47,6 @@ func main() {
 	webServer.ServerId = c.ServiceId
 	webServer.Log = logx.WithContext(context.Background())
 	webServer.Node = node
-	webServer.Conf.PingPeriod = time.Duration(c.PingPeriod) * time.Second
 	// 启动websocket服务
 	webServer.StartWebsocket()
 

@@ -1,32 +1,23 @@
 package server
 
 import (
-	"github.com/bwmarrin/snowflake"
-	"github.com/zeromicro/go-zero/core/logx"
+	"github.com/gorilla/websocket"
+	"github.com/zeromicro/go-zero/core/jsonx"
 	"net/http"
 	"store/websocket/internal/types"
-	"sync"
 	"time"
 )
 
-type Server struct {
-	Buckets   []*Bucket
-	BucketIdx uint32
-	ServerId  string
-	Log       logx.Logger
-	Node      *snowflake.Node
-	Conf      ServerConf
-}
-type ServerConf struct {
-	PingPeriod time.Duration
-}
+const (
+	// OperateSingleMsg 单人聊天操作
+	OperateSingleMsg = 2
+	// OperateGroupMsg 群体聊天操作
+	OperateGroupMsg = 3
+	// OperateConn 建立连接操作
+	OperateConn = 10
+)
 
-type Bucket struct {
-	cLock   sync.RWMutex
-	clients map[int64]*Client
-	stores  map[int64]*types.Store
-	rooms   map[int64]*types.Room
-}
+type Server types.Server
 
 // NewServer
 // @Auth：parker
@@ -43,9 +34,9 @@ func NewServer() *Server {
 // @Date：2024-05-14 14:34:52
 // @receiver：s
 func (s *Server) StartWebsocket() {
-	websocket := NewConnect(s.ServerId, s.Node)
+	connect := NewConnect(s.ServerId, s.Node)
 	http.HandleFunc("/ws", func(writer http.ResponseWriter, request *http.Request) {
-		websocket.Run(writer, request, s)
+		connect.Run(writer, request, s)
 	})
 }
 
@@ -55,13 +46,13 @@ func (s *Server) StartWebsocket() {
 // @Date：2024-05-14 14:11:27
 // @param：bucketNumber 池子数量
 // @return：[]*Bucket
-func NewBuckets(bucketNumber uint) []*Bucket {
-	buckets := make([]*Bucket, bucketNumber)
+func NewBuckets(bucketNumber uint) []*types.Bucket {
+	buckets := make([]*types.Bucket, bucketNumber)
 	for i := uint(0); i < bucketNumber; i++ {
-		buckets[i] = &Bucket{
-			clients: make(map[int64]*Client),
-			stores:  make(map[int64]*types.Store),
-			rooms:   make(map[int64]*types.Room),
+		buckets[i] = &types.Bucket{
+			//clients: make(map[int64]*Client),
+			Stores: make(map[int64]*types.Store),
+			Rooms:  make(map[int64]*types.Room),
 		}
 	}
 	return buckets
@@ -72,16 +63,37 @@ func NewBuckets(bucketNumber uint) []*Bucket {
 // @Desc：写消息的
 // @Date：2024-05-22 15:47:30
 // @receiver：s
-func (s *Server) writeChannel(client *Client) {
+func (s *Server) writeChannel(client *types.Client) {
 	// ping前端的时隔
-	ticker := time.NewTicker(s.Conf.PingPeriod)
+	ticker := time.NewTicker(PingPeriod)
 	defer func() {
 		ticker.Stop()
+		_ = client.Websocket.Close()
 	}()
 	for {
 		select {
+		case message, ok := <-client.Broadcast:
+			if !ok {
+				s.Log.Error("server websocket client.Broadcast not ok ")
+				_ = client.Websocket.WriteMessage(websocket.CloseMessage, []byte{})
+				return
+			}
+			w, err := client.Websocket.NextWriter(websocket.TextMessage)
+			if err != nil {
+				s.Log.Errorf("server websocket.Conn.NextWriter fail:%s", err.Error())
+				return
+			}
+			_, _ = w.Write(message.Body)
+			if err = w.Close(); err != nil {
+				s.Log.Errorf("server websocket w.Close() fail:%s", err.Error())
+				return
+			}
 		case <-ticker.C:
-
+			// 心跳检测
+			if err := client.Websocket.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+				s.Log.Errorf("server websocket.WriteMessage fail:%s", err.Error())
+				return
+			}
 		}
 	}
 }
@@ -91,6 +103,33 @@ func (s *Server) writeChannel(client *Client) {
 // @Desc：读消息的
 // @Date：2024-05-22 15:47:30
 // @receiver：s
-func (s *Server) readChannel(client *Client) {
+func (s *Server) readChannel(client *types.Client) {
+	defer func() {
 
+	}()
+
+	for true {
+		_, message, err := client.Websocket.ReadMessage()
+		if err != nil {
+			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
+				s.Log.Errorf("server websocket.ReadMessage fail:%s", err.Error())
+				continue
+			}
+		}
+		if message == nil {
+			s.Log.Info("server websocket.ReadMessage message is nil")
+			continue
+		}
+		// 将body信息转换成结构
+		var websocketMsg types.ReceiveMsg
+		if err = jsonx.Unmarshal(message, &websocketMsg); err != nil {
+			s.Log.Errorf("server websocket,message json.Unmarshal websocketMsg fail:%s", err.Error())
+			continue
+		}
+
+		switch websocketMsg.Operate {
+		case OperateSingleMsg:
+		case OperateGroupMsg:
+		}
+	}
 }

@@ -5,10 +5,20 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
+	"time"
 )
 
 const (
+	// MaxMessageSize 消息大小
 	MaxMessageSize = 8192
+	// PingPeriod 每次ping的间隔时长
+	PingPeriod = time.Duration(30) * time.Second
+	// PongPeriod 每次pong的间隔时长，可以是PingPeriod的一倍活两倍
+	PongPeriod = time.Duration(30) * time.Second
+	// WriteWait client的写入等待时长
+	WriteWait = time.Duration(10) * time.Second
+	// ReadWait client的读取等待时长
+	ReadWait = time.Duration(10) * time.Second
 )
 
 type Connect struct {
@@ -39,12 +49,19 @@ func (c *Connect) Run(w http.ResponseWriter, r *http.Request, webServer *Server)
 		http.NotFound(w, r)
 		return
 	}
+
+	_ = wsConn.SetWriteDeadline(time.Now().Add(WriteWait))
+	_ = wsConn.SetReadDeadline(time.Now().Add(ReadWait))
 	wsConn.SetReadLimit(MaxMessageSize)
+	wsConn.SetPongHandler(func(string) error {
+		_ = wsConn.SetReadDeadline(time.Now().Add(PongPeriod))
+		return nil
+	})
 
 	clientId := c.Node.Generate().Int64()
-	clientChannle := NewClient(clientId, wsConn)
+	clientChannel := NewClient(clientId, wsConn)
 
 	// 每个连接单独一个读写消息,避免消息拥挤
-	go webServer.writeChannel(clientChannle)
-	go webServer.readChannel(clientChannle)
+	go webServer.writeChannel(clientChannel)
+	go webServer.readChannel(clientChannel)
 }

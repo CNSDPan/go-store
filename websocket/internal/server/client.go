@@ -2,19 +2,9 @@ package server
 
 import (
 	"github.com/gorilla/websocket"
+	"store/websocket/internal/types"
 	"time"
 )
-
-type Client struct {
-	ClientId    int64
-	Socket      *websocket.Conn
-	ConnectTime uint64
-	IsDeleted   bool
-	StoreId     int64
-	RoomId      int64
-	Extend      string
-	GroupList   []string
-}
 
 // NewClient
 // @Auth：parker
@@ -23,10 +13,10 @@ type Client struct {
 // @param：clientId
 // @param：conn
 // @return：*Client
-func NewClient(clientId int64, conn *websocket.Conn) *Client {
-	return &Client{
+func NewClient(clientId int64, conn *websocket.Conn) *types.Client {
+	return &types.Client{
 		ClientId:    clientId,
-		Socket:      conn,
+		Websocket:   conn,
 		ConnectTime: uint64(time.Now().Unix()),
 		IsDeleted:   false,
 		Extend:      "",
