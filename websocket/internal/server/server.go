@@ -130,6 +130,9 @@ func (s *Server) readChannel(client *types.Client) {
 		switch websocketMsg.Operate {
 		case OperateSingleMsg:
 		case OperateGroupMsg:
+		case OperateConn:
+			// client与server建立websocket成功后，client推送一次操作事件Operate:10，server将其进行连接池分组
+
 		}
 	}
 }
