@@ -6,6 +6,19 @@ import (
 	"time"
 )
 
+type Client struct {
+	AutoToken   string
+	ClientId    int64
+	Websocket   *websocket.Conn
+	ConnectTime uint64
+	StoreId     int64
+	RoomId      int64
+	UserId      int64
+	Extend      string
+	BucketId    string
+	Broadcast   chan types.Msg // 通过管道实时监控消息
+}
+
 // NewClient
 // @Auth：parker
 // @Desc：初始化一个用户连接
@@ -13,13 +26,10 @@ import (
 // @param：clientId
 // @param：conn
 // @return：*Client
-func NewClient(clientId int64, conn *websocket.Conn) *types.Client {
-	return &types.Client{
-		ClientId:    clientId,
+func NewClient(conn *websocket.Conn) *Client {
+	return &Client{
 		Websocket:   conn,
 		ConnectTime: uint64(time.Now().Unix()),
-		IsDeleted:   false,
 		Extend:      "",
-		GroupList:   make([]string, 0),
 	}
 }

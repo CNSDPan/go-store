@@ -1,19 +1,5 @@
 package types
 
-import "github.com/gorilla/websocket"
-
-type Client struct {
-	ClientId    int64
-	Websocket   *websocket.Conn
-	ConnectTime uint64
-	IsDeleted   bool
-	StoreId     int64
-	RoomId      int64
-	Extend      string
-	GroupList   []string
-	Broadcast   chan Msg // 通过管道实时监控消息
-}
-
 // Msg
 // @Auth：parker
 // @Desc：服务端websocket推送到客户端的消息

@@ -58,10 +58,11 @@ func (c *Connect) Run(w http.ResponseWriter, r *http.Request, webServer *Server)
 		return nil
 	})
 
-	clientId := c.Node.Generate().Int64()
-	clientChannel := NewClient(clientId, wsConn)
+	// 校验autoToken用户是否正常
+	autoToken := r.FormValue("AutoToken")
+	clientChannel := NewClient(wsConn)
+	clientChannel.AutoToken = autoToken
 
-	// 每个连接单独一个读写消息,避免消息拥挤
 	go webServer.writeChannel(clientChannel)
 	go webServer.readChannel(clientChannel)
 }

@@ -1,10 +1,15 @@
 package server
 
 import (
+	"github.com/bwmarrin/snowflake"
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/jsonx"
+	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
+	"store/tools"
 	"store/websocket/internal/types"
+	"strconv"
+	"sync"
 	"time"
 )
 
@@ -17,7 +22,25 @@ const (
 	OperateConn = 10
 )
 
-type Server types.Server
+type Server struct {
+	Buckets       []*Bucket
+	BucketIdx     uint32
+	ServerId      string
+	ClientManager ClientManager
+	Log           logx.Logger
+	Node          *snowflake.Node
+}
+
+// Bucket
+// @Auth：parker
+// @Desc：连接池
+// @Date：2024-05-23 10:43:39
+type Bucket struct {
+	CLock   sync.RWMutex
+	Clients map[int64]*Client
+	Rooms   map[int64][]int64
+	Idx     uint32
+}
 
 // NewServer
 // @Auth：parker
@@ -40,22 +63,17 @@ func (s *Server) StartWebsocket() {
 	})
 }
 
-// NewBuckets
+// getBucket
 // @Auth：parker
-// @Desc：初始化websocket连接池
-// @Date：2024-05-14 14:11:27
-// @param：bucketNumber 池子数量
-// @return：[]*Bucket
-func NewBuckets(bucketNumber uint) []*types.Bucket {
-	buckets := make([]*types.Bucket, bucketNumber)
-	for i := uint(0); i < bucketNumber; i++ {
-		buckets[i] = &types.Bucket{
-			//clients: make(map[int64]*Client),
-			Stores: make(map[int64]*types.Store),
-			Rooms:  make(map[int64]*types.Room),
-		}
-	}
-	return buckets
+// @Desc：通过群聊房间ID得出所在连接池
+// @Date：2024-05-28 14:24:13
+// @receiver：s
+// @param：roomId
+func (s *Server) getBucket(roomId int64) *Bucket {
+	roomIdStr := strconv.FormatInt(roomId, 10)
+	// 通过cityHash算法 % 池子数量进行取模,得出需要放入哪个连接池里
+	idx := tools.CityHash32([]byte(roomIdStr), uint32(len(roomIdStr))) % s.BucketIdx
+	return s.Buckets[idx]
 }
 
 // writeMessage
@@ -63,7 +81,7 @@ func NewBuckets(bucketNumber uint) []*types.Bucket {
 // @Desc：写消息的
 // @Date：2024-05-22 15:47:30
 // @receiver：s
-func (s *Server) writeChannel(client *types.Client) {
+func (s *Server) writeChannel(client *Client) {
 	// ping前端的时隔
 	ticker := time.NewTicker(PingPeriod)
 	defer func() {
@@ -103,9 +121,10 @@ func (s *Server) writeChannel(client *types.Client) {
 // @Desc：读消息的
 // @Date：2024-05-22 15:47:30
 // @receiver：s
-func (s *Server) readChannel(client *types.Client) {
+func (s *Server) readChannel(client *Client) {
 	defer func() {
-
+		client.
+			_ = client.Websocket.Close()
 	}()
 
 	for true {
@@ -132,6 +151,16 @@ func (s *Server) readChannel(client *types.Client) {
 		case OperateGroupMsg:
 		case OperateConn:
 			// client与server建立websocket成功后，client推送一次操作事件Operate:10，server将其进行连接池分组
+			client.UserId, client.ClientId = s.ClientManager.Connect(client.AutoToken)
+			if client.UserId == 0 {
+				s.Log.Errorf("server websocket ClientManager.Connect user undefined by token:%s", client.AutoToken)
+				return
+			}
+			// 获取要加入加入池子
+			bucket := s.getBucket(websocketMsg.RoomId)
+			s.Log.Infof("server websocket autoToken:%s bucket.Idx:%d", client.AutoToken, bucket.Idx)
+			bucket.putBucket(client, websocketMsg.RoomId)
+			// 请求grpc广播消息，通知群有用户进入群聊
 
 		}
 	}
