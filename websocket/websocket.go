@@ -8,6 +8,7 @@ import (
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest"
+	"net/http"
 	"store/websocket/internal/config"
 	"store/websocket/internal/handler"
 	"store/websocket/internal/server"
@@ -48,7 +49,15 @@ func main() {
 	webServer.Log = logx.WithContext(context.Background())
 	webServer.Node = node
 	// 启动websocket服务
-	webServer.StartWebsocket()
+	//webServer.StartWebsocket()
+	connect := server.NewConnect(webServer.ServerId, webServer.Node)
+	s.AddRoute(rest.Route{
+		Method: http.MethodGet,
+		Path:   "/ws",
+		Handler: func(w http.ResponseWriter, r *http.Request) {
+			connect.Run(w, r, webServer)
+		},
+	})
 
 	fmt.Printf("Starting websocket server at %s:%d...\n", c.Host, c.Port)
 	s.Start()

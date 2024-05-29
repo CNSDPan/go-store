@@ -71,3 +71,38 @@ func goCh(ch chan *Ch) {
 		fmt.Printf("接收msg:%v \r\n", age.Msg)
 	}
 }
+
+const (
+	socketUrl = "ws://0.0.0.0:7000/ws"
+	authToken = "2gDGQwDxsrX0UG8yRbophdHxHqD"
+)
+
+func TestRoomSocket(t *testing.T) {
+	tClient, err := New(socketUrl)
+	if err != nil {
+		return
+	}
+	err = tClient.Auth(authToken)
+	if err != nil {
+		return
+	}
+	tClient.send()
+	tClient.read()
+
+	go func() {
+		//var num = 0
+		for {
+			//num++
+			fmt.Println("发送消息 ")
+			tClient.sendMsgChan <- "发送" + time.Now().Format("2006-01-02 15:04:05")
+			time.Sleep(1 * time.Second)
+		}
+	}()
+
+	for {
+		select {
+		case m := <-tClient.recvMsgChan:
+			fmt.Printf("发送消息%v", m)
+		}
+	}
+}

@@ -12,13 +12,13 @@ const (
 	// MaxMessageSize 消息大小
 	MaxMessageSize = 8192
 	// PingPeriod 每次ping的间隔时长
-	PingPeriod = time.Duration(30) * time.Second
-	// PongPeriod 每次pong的间隔时长，可以是PingPeriod的一倍活两倍
-	PongPeriod = time.Duration(30) * time.Second
+	PingPeriod = 54 * time.Second
+	// PongPeriod 每次pong的间隔时长，可以是PingPeriod的一倍|两倍
+	PongPeriod = 60 * time.Second
 	// WriteWait client的写入等待时长
-	WriteWait = time.Duration(10) * time.Second
+	WriteWait = 5 * time.Second
 	// ReadWait client的读取等待时长
-	ReadWait = time.Duration(10) * time.Second
+	ReadWait = 60 * time.Second
 )
 
 type Connect struct {
@@ -58,10 +58,7 @@ func (c *Connect) Run(w http.ResponseWriter, r *http.Request, webServer *Server)
 		return nil
 	})
 
-	// 校验autoToken用户是否正常
-	autoToken := r.FormValue("AutoToken")
 	clientChannel := NewClient(wsConn)
-	clientChannel.AutoToken = autoToken
 
 	go webServer.writeChannel(clientChannel)
 	go webServer.readChannel(clientChannel)

@@ -79,7 +79,8 @@ func (clientManager *ClientManager) Connect(autoToken string) (userId int64, cli
 // @Date：2024-05-27 17:44:32
 // @receiver：client
 func (clientManager *ClientManager) DisConnect() {
-
+	// 请求Grpc处理业务
+	return
 }
 
 // NewBuckets
@@ -92,8 +93,9 @@ func NewBuckets(bucketNumber uint) []*Bucket {
 	buckets := make([]*Bucket, bucketNumber)
 	for i := uint(0); i < bucketNumber; i++ {
 		buckets[i] = &Bucket{
-			Rooms: make(map[int64][]int64),
-			Idx:   uint32(i),
+			Clients: make(map[int64]*Client),
+			Rooms:   make(map[int64][]int64),
+			Idx:     uint32(i),
 		}
 	}
 	return buckets
@@ -101,7 +103,7 @@ func NewBuckets(bucketNumber uint) []*Bucket {
 
 // putBucket
 // @Auth：parker
-// @Desc：加入某个池子的rooms
+// @Desc：加入某个池子的
 // @Date：2024-05-28 17:56:51
 // @receiver：b
 // @param：client
@@ -111,5 +113,19 @@ func (b *Bucket) putBucket(client *Client, roomId int64) {
 	defer b.CLock.Unlock()
 	b.Clients[client.ClientId] = client
 	b.Rooms[roomId] = append(b.Rooms[roomId], client.ClientId)
+	return
+}
+
+// DelBucket
+// @Auth：parker
+// @Desc：移出池子
+// @Date：2024-05-29 10:36:35
+// @receiver：b
+// @param：client
+func (b *Bucket) DelBucket(client *Client) {
+	b.CLock.Lock()
+	defer b.CLock.Unlock()
+	delete(b.Rooms, client.RoomId)
+	delete(b.Clients, client.ClientId)
 	return
 }

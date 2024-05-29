@@ -82,6 +82,8 @@ func (s *Server) getBucket(roomId int64) *Bucket {
 // @Date：2024-05-22 15:47:30
 // @receiver：s
 func (s *Server) writeChannel(client *Client) {
+	s.Log.Info("server websocket writeChannel start")
+	s.Log.Infof("server websocket writeChannel PingPeriod:%v", PingPeriod)
 	// ping前端的时隔
 	ticker := time.NewTicker(PingPeriod)
 	defer func() {
@@ -107,11 +109,16 @@ func (s *Server) writeChannel(client *Client) {
 				return
 			}
 		case <-ticker.C:
+			s.Log.Infof("server websocket writeChannel client.UserId:%d", client.UserId)
 			// 心跳检测
-			if err := client.Websocket.WriteMessage(websocket.PingMessage, []byte{}); err != nil {
+			if err := client.Websocket.WriteMessage(websocket.PingMessage, nil); err != nil {
 				s.Log.Errorf("server websocket.WriteMessage fail:%s", err.Error())
 				return
 			}
+			//if err := client.Websocket.WriteMessage(websocket.TextMessage, []byte("自动发送")); err != nil {
+			//	s.Log.Errorf("server websocket sand fail:%s", err.Error())
+			//}
+			s.Log.Infof("server websocket.WriteMessage ok")
 		}
 	}
 }
@@ -123,32 +130,50 @@ func (s *Server) writeChannel(client *Client) {
 // @receiver：s
 func (s *Server) readChannel(client *Client) {
 	defer func() {
-		client.
+		//移出连接池
+		if client.RoomId == 0 || client.UserId == 0 {
+			s.Log.Infof("server websocket.readChannel client.RoomId || client.UserId eq 0")
 			_ = client.Websocket.Close()
+			return
+		}
+		s.Log.Infof("server websocket client.UserId:%d disconnect", client.UserId)
+		s.getBucket(client.RoomId).DelBucket(client)
+		// 断连后需要处理其他业务请求grpc
+		s.ClientManager.DisConnect()
+		_ = client.Websocket.Close()
 	}()
 
-	for true {
+	for {
 		_, message, err := client.Websocket.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				s.Log.Errorf("server websocket.ReadMessage fail:%s", err.Error())
-				continue
+				return
 			}
 		}
 		if message == nil {
-			s.Log.Info("server websocket.ReadMessage message is nil")
-			continue
+			s.Log.Infof("server websocket.ReadMessage message is nil:%v", message)
+			return
 		}
 		// 将body信息转换成结构
 		var websocketMsg types.ReceiveMsg
 		if err = jsonx.Unmarshal(message, &websocketMsg); err != nil {
-			s.Log.Errorf("server websocket,message json.Unmarshal websocketMsg fail:%s", err.Error())
+			s.Log.Errorf("server websocket.message json.Unmarshal websocketMsg fail:%s", err.Error())
 			continue
 		}
+		client.AutoToken = websocketMsg.AuthToken
+		client.RoomId = websocketMsg.RoomId
 
+		client.Websocket.SetReadLimit(MaxMessageSize)
+		client.Websocket.SetReadDeadline(time.Now().Add(ReadWait))
+		client.Websocket.SetPongHandler(func(string) error {
+			client.Websocket.SetReadDeadline(time.Now().Add(PongPeriod))
+			return nil
+		})
 		switch websocketMsg.Operate {
 		case OperateSingleMsg:
 		case OperateGroupMsg:
+			s.Log.Infof("打印发送群消息%v", websocketMsg.Event)
 		case OperateConn:
 			// client与server建立websocket成功后，client推送一次操作事件Operate:10，server将其进行连接池分组
 			client.UserId, client.ClientId = s.ClientManager.Connect(client.AutoToken)
@@ -161,7 +186,6 @@ func (s *Server) readChannel(client *Client) {
 			s.Log.Infof("server websocket autoToken:%s bucket.Idx:%d", client.AutoToken, bucket.Idx)
 			bucket.putBucket(client, websocketMsg.RoomId)
 			// 请求grpc广播消息，通知群有用户进入群聊
-
 		}
 	}
 }
