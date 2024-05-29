@@ -82,7 +82,7 @@ func (t *TestClient) Auth(authToken string) error {
 	return nil
 }
 
-func (t *TestClient) send() {
+func (t *TestClient) Send() {
 	go func() {
 		r := ReceiveMsg{
 			Version: 1,
@@ -109,7 +109,7 @@ func (t *TestClient) send() {
 	}()
 }
 
-func (t *TestClient) read() {
+func (t *TestClient) Read() {
 	go func() {
 		var (
 			mType int

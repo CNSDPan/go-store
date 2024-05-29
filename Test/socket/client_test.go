@@ -86,8 +86,8 @@ func TestRoomSocket(t *testing.T) {
 	if err != nil {
 		return
 	}
-	tClient.send()
-	tClient.read()
+	tClient.Send()
+	tClient.Read()
 
 	go func() {
 		//var num = 0
