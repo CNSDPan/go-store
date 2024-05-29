@@ -126,3 +126,25 @@ func (t *TestClient) Read() {
 		}
 	}()
 }
+
+func (t *TestClient) TestAuth() error {
+	msg := Data{
+		Ip:       "",
+		User:     "8",
+		From:     "",
+		Type:     "login",
+		Content:  "",
+		UserList: nil,
+	}
+	b, err := jsonx.Marshal(msg)
+	if err != nil {
+		fmt.Println("jsonx.Marshal fail:", err.Error())
+		return err
+	}
+	err = t.Conn.WriteMessage(websocket.TextMessage, b)
+	if err != nil {
+		fmt.Println("t.Conn.WriteMessage fail:", err.Error())
+		return err
+	}
+	return nil
+}
