@@ -31,5 +31,6 @@ func NewClient(conn *websocket.Conn) *Client {
 		Websocket:   conn,
 		ConnectTime: uint64(time.Now().Unix()),
 		Extend:      "",
+		Broadcast:   make(chan types.Msg, 100),
 	}
 }

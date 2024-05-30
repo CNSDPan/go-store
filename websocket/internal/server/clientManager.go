@@ -2,6 +2,7 @@ package server
 
 import (
 	"store/tools"
+	"store/websocket/internal/types"
 	"strconv"
 )
 
@@ -56,7 +57,7 @@ func userTest() map[string]map[string]interface{} {
 // @param：autoToken
 // @return：userId 用户ID
 // @return：ClientId 连接唯一ID
-func (clientManager *ClientManager) Connect(autoToken string) (userId int64, clientId int64) {
+func (clientM *ClientManager) Connect(autoToken string) (userId int64, clientId int64) {
 	//请求grpc处理业务，校验用户是否正常的，正常则返回clientId和用户信息等
 
 	// 例子
@@ -78,7 +79,7 @@ func (clientManager *ClientManager) Connect(autoToken string) (userId int64, cli
 // @Desc：断链事件
 // @Date：2024-05-27 17:44:32
 // @receiver：client
-func (clientManager *ClientManager) DisConnect() {
+func (clientM *ClientManager) DisConnect() {
 	// 请求Grpc处理业务
 	return
 }
@@ -128,4 +129,20 @@ func (b *Bucket) DelBucket(client *Client) {
 	delete(b.Rooms, client.RoomId)
 	delete(b.Clients, client.ClientId)
 	return
+}
+
+// MethodHandle
+// @Auth：parker
+// @Desc：事件处理
+// @Date：2024-05-30 15:30:41
+// @receiver：clientM
+// @param：msg
+func (clientM *ClientManager) MethodHandle(msg types.ReceiveMsg) {
+	switch msg.Method {
+	case "Enter":
+	case "Out":
+	case "Speak":
+	case "Server":
+
+	}
 }

@@ -82,8 +82,6 @@ func (s *Server) getBucket(roomId int64) *Bucket {
 // @Date：2024-05-22 15:47:30
 // @receiver：s
 func (s *Server) writeChannel(client *Client) {
-	s.Log.Info("server websocket writeChannel start")
-	s.Log.Infof("server websocket writeChannel PingPeriod:%v", PingPeriod)
 	// ping前端的时隔
 	ticker := time.NewTicker(PingPeriod)
 	defer func() {
@@ -93,6 +91,8 @@ func (s *Server) writeChannel(client *Client) {
 	for {
 		select {
 		case message, ok := <-client.Broadcast:
+			// 每次写之前，都需要设置超时时间，如果只设置一次就会出现总是超时
+			client.Websocket.SetWriteDeadline(time.Now().Add(WriteWait))
 			if !ok {
 				s.Log.Error("server websocket client.Broadcast not ok ")
 				_ = client.Websocket.WriteMessage(websocket.CloseMessage, []byte{})
@@ -109,16 +109,13 @@ func (s *Server) writeChannel(client *Client) {
 				return
 			}
 		case <-ticker.C:
-			s.Log.Infof("server websocket writeChannel client.UserId:%d", client.UserId)
+			// 每次写之前，都需要设置超时时间，如果只设置一次就会出现总是超时
+			client.Websocket.SetWriteDeadline(time.Now().Add(PingPeriod))
 			// 心跳检测
 			if err := client.Websocket.WriteMessage(websocket.PingMessage, nil); err != nil {
 				s.Log.Errorf("server websocket.WriteMessage fail:%s", err.Error())
 				return
 			}
-			//if err := client.Websocket.WriteMessage(websocket.TextMessage, []byte("自动发送")); err != nil {
-			//	s.Log.Errorf("server websocket sand fail:%s", err.Error())
-			//}
-			s.Log.Infof("server websocket.WriteMessage ok")
 		}
 	}
 }
@@ -173,6 +170,14 @@ func (s *Server) readChannel(client *Client) {
 		switch websocketMsg.Operate {
 		case OperateSingleMsg:
 		case OperateGroupMsg:
+			client.Broadcast <- types.Msg{
+				Version:      1,
+				Operate:      3,
+				Method:       "Msg",
+				SendClientId: 0,
+				Extend:       "",
+				Body:         []byte("给自己发送消息"),
+			}
 			s.Log.Infof("打印发送群消息%v", websocketMsg.Event)
 		case OperateConn:
 			// client与server建立websocket成功后，client推送一次操作事件Operate:10，server将其进行连接池分组

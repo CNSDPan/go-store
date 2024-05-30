@@ -6,7 +6,6 @@ import (
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"log"
 	"strconv"
-	"time"
 )
 
 type TestClient struct {
@@ -37,10 +36,10 @@ type Event struct {
 }
 
 func New(url string) (tClient *TestClient, err error) {
-	var d *websocket.Dialer
-	d.HandshakeTimeout = 30 * time.Second
-	conn, res, err := d.Dial(url, nil)
-	//conn,res,err:=websocket.DefaultDialer.Dial("ws://127.0.0.1:6999/ws", nil)
+	//var d *websocket.Dialer
+	//d.HandshakeTimeout = 30 * time.Second
+	//conn, res, err := d.Dial(url, nil)
+	conn, res, err := websocket.DefaultDialer.Dial("ws://127.0.0.1:7000/ws", nil)
 	if err != nil {
 		log.Println("拨号失败:", res)
 		return nil, err
@@ -125,26 +124,4 @@ func (t *TestClient) Read() {
 			t.recvMsgChan <- "读取" + strconv.Itoa(mType) + string(b)
 		}
 	}()
-}
-
-func (t *TestClient) TestAuth() error {
-	msg := Data{
-		Ip:       "",
-		User:     "8",
-		From:     "",
-		Type:     "login",
-		Content:  "",
-		UserList: nil,
-	}
-	b, err := jsonx.Marshal(msg)
-	if err != nil {
-		fmt.Println("jsonx.Marshal fail:", err.Error())
-		return err
-	}
-	err = t.Conn.WriteMessage(websocket.TextMessage, b)
-	if err != nil {
-		fmt.Println("t.Conn.WriteMessage fail:", err.Error())
-		return err
-	}
-	return nil
 }

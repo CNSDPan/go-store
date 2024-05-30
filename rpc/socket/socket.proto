@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package socket;
+option go_package="./socket";
+
+import "google/protobuf/any.proto";
+
+message ReqBroadcast {
+  int32 version = 1;
+  int32 Operate = 2;
+  string Method = 3;
+  message event {
+    google.protobuf.Any params = 1;
+    google.protobuf.Any data = 2;
+  };
+  int64 roomId = 4;
+  int64 fromClientId = 5;
+  int64 toClientId = 6;
+  string msg = 7;
+  string extend = 8;
+  string autoToken = 9;
+}
+
+
+message ResSuccess {
+  string module = 4;
+  string code = 1;
+  string msg = 2;
+  google.protobuf.Any data = 3;
+}
+
+service Socket {
+  rpc Broadcast(ReqBroadcast) returns(ResSuccess);
+}

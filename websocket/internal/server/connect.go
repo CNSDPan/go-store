@@ -12,7 +12,7 @@ const (
 	// MaxMessageSize 消息大小
 	MaxMessageSize = 8192
 	// PingPeriod 每次ping的间隔时长
-	PingPeriod = 54 * time.Second
+	PingPeriod = 30 * time.Second
 	// PongPeriod 每次pong的间隔时长，可以是PingPeriod的一倍|两倍
 	PongPeriod = 60 * time.Second
 	// WriteWait client的写入等待时长
