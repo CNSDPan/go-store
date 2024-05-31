@@ -33,6 +33,23 @@ services:
     networks:
       store:
         ipv4_address: 172.20.2.100
+  rpc-socket:
+    container_name: rpc-socket
+    image: debian:latest
+    ports:
+      - "8882:8080"
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${APP_PATH}/rpc/socket/bin/rpc_socket.bin:${MOUNT_PATH}/rpc_socket.bin
+      - ${APP_PATH}/rpc/socket/etc:${MOUNT_PATH}/etc
+      - ${APP_PATH}/tmp/:${MOUNT_PATH}/tmp
+      - ${APP_PATH}/yaml/:${MOUNT_PATH}/yaml
+      - ${APP_PATH}/common/:${MOUNT_PATH}/common
+    command: /bin/bash -c "cd /var/www/store&&./rpc_socket.bin module service >> tmp/rpc-socket.err"
+    networks:
+      store:
+        ipv4_address: 172.20.2.101
   api:
     container_name: api
     #使用别人的构造器
