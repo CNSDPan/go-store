@@ -2,7 +2,6 @@ package logic
 
 import (
 	"context"
-
 	"store/rpc/socket/internal/svc"
 	"store/rpc/socket/pb/socket"
 
@@ -23,8 +22,8 @@ func NewBroadcastLogic(ctx context.Context, svcCtx *svc.ServiceContext) *Broadca
 	}
 }
 
-func (l *BroadcastLogic) Broadcast(in *socket.ReqBroadcast) (*socket.ResSuccess, error) {
+func (l *BroadcastLogic) Broadcast(in *socket.ReqBroadcastNormal) (*socket.ResSuccess, error) {
 	// todo: add your logic here and delete this line
-	
+	//server.AloneRedisClient.LPushX(common.Redis_Socket_Message_Normal_Key,in.)
 	return &socket.ResSuccess{}, nil
 }

@@ -22,7 +22,7 @@ func NewSocketServer(svcCtx *svc.ServiceContext) *SocketServer {
 	}
 }
 
-func (s *SocketServer) Broadcast(ctx context.Context, in *socket.ReqBroadcast) (*socket.ResSuccess, error) {
+func (s *SocketServer) Broadcast(ctx context.Context, in *socket.ReqBroadcastNormal) (*socket.ResSuccess, error) {
 	l := logic.NewBroadcastLogic(ctx, s.svcCtx)
 	return l.Broadcast(in)
 }

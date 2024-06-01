@@ -33,7 +33,10 @@ func main() {
 		}
 	})
 	defer s.Stop()
-
+	// 初始化redis
+	if err := server.InitAloneRedis(); err != nil {
+		panic("rpc.socket init alone redis panic:" + err.Error())
+	}
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)
 	s.Start()
 }

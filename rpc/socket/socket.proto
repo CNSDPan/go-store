@@ -3,11 +3,16 @@ syntax = "proto3";
 package socket;
 option go_package="./socket";
 
-message ReqBroadcast {
+message EventNoraml {
+  string params = 1;
+}
+
+message ReqBroadcastNormal {
+
   int32 version = 1;
-  int32 Operate = 2;
-  string Method = 3;
-  bytes event = 4;
+  int32 operate = 2;
+  string method = 3;
+  EventNoraml event = 4;
   int64 roomId = 5;
   int64 fromClientId = 6;
   int64 toClientId = 7;
@@ -16,7 +21,6 @@ message ReqBroadcast {
   string autoToken = 10;
 }
 
-
 message ResSuccess {
   string module = 4;
   string code = 1;
@@ -24,5 +28,5 @@ message ResSuccess {
 }
 
 service Socket {
-  rpc Broadcast(ReqBroadcast) returns(ResSuccess);
+  rpc Broadcast(ReqBroadcastNormal) returns(ResSuccess);
 }

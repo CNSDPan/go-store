@@ -26,7 +26,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SocketClient interface {
-	Broadcast(ctx context.Context, in *ReqBroadcast, opts ...grpc.CallOption) (*ResSuccess, error)
+	Broadcast(ctx context.Context, in *ReqBroadcastNormal, opts ...grpc.CallOption) (*ResSuccess, error)
 }
 
 type socketClient struct {
@@ -37,7 +37,7 @@ func NewSocketClient(cc grpc.ClientConnInterface) SocketClient {
 	return &socketClient{cc}
 }
 
-func (c *socketClient) Broadcast(ctx context.Context, in *ReqBroadcast, opts ...grpc.CallOption) (*ResSuccess, error) {
+func (c *socketClient) Broadcast(ctx context.Context, in *ReqBroadcastNormal, opts ...grpc.CallOption) (*ResSuccess, error) {
 	out := new(ResSuccess)
 	err := c.cc.Invoke(ctx, Socket_Broadcast_FullMethodName, in, out, opts...)
 	if err != nil {
@@ -50,7 +50,7 @@ func (c *socketClient) Broadcast(ctx context.Context, in *ReqBroadcast, opts ...
 // All implementations must embed UnimplementedSocketServer
 // for forward compatibility
 type SocketServer interface {
-	Broadcast(context.Context, *ReqBroadcast) (*ResSuccess, error)
+	Broadcast(context.Context, *ReqBroadcastNormal) (*ResSuccess, error)
 	mustEmbedUnimplementedSocketServer()
 }
 
@@ -58,7 +58,7 @@ type SocketServer interface {
 type UnimplementedSocketServer struct {
 }
 
-func (UnimplementedSocketServer) Broadcast(context.Context, *ReqBroadcast) (*ResSuccess, error) {
+func (UnimplementedSocketServer) Broadcast(context.Context, *ReqBroadcastNormal) (*ResSuccess, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Broadcast not implemented")
 }
 func (UnimplementedSocketServer) mustEmbedUnimplementedSocketServer() {}
@@ -75,7 +75,7 @@ func RegisterSocketServer(s grpc.ServiceRegistrar, srv SocketServer) {
 }
 
 func _Socket_Broadcast_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReqBroadcast)
+	in := new(ReqBroadcastNormal)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -87,7 +87,7 @@ func _Socket_Broadcast_Handler(srv interface{}, ctx context.Context, dec func(in
 		FullMethod: Socket_Broadcast_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SocketServer).Broadcast(ctx, req.(*ReqBroadcast))
+		return srv.(SocketServer).Broadcast(ctx, req.(*ReqBroadcastNormal))
 	}
 	return interceptor(ctx, in, info, handler)
 }

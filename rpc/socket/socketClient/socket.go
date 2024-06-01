@@ -13,11 +13,12 @@ import (
 )
 
 type (
-	ReqBroadcast = socket.ReqBroadcast
-	ResSuccess   = socket.ResSuccess
+	EventNoraml        = socket.EventNoraml
+	ReqBroadcastNormal = socket.ReqBroadcastNormal
+	ResSuccess         = socket.ResSuccess
 
 	Socket interface {
-		Broadcast(ctx context.Context, in *ReqBroadcast, opts ...grpc.CallOption) (*ResSuccess, error)
+		Broadcast(ctx context.Context, in *ReqBroadcastNormal, opts ...grpc.CallOption) (*ResSuccess, error)
 	}
 
 	defaultSocket struct {
@@ -31,7 +32,7 @@ func NewSocket(cli zrpc.Client) Socket {
 	}
 }
 
-func (m *defaultSocket) Broadcast(ctx context.Context, in *ReqBroadcast, opts ...grpc.CallOption) (*ResSuccess, error) {
+func (m *defaultSocket) Broadcast(ctx context.Context, in *ReqBroadcastNormal, opts ...grpc.CallOption) (*ResSuccess, error) {
 	client := socket.NewSocketClient(m.cli.Conn())
 	return client.Broadcast(ctx, in, opts...)
 }

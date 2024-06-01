@@ -35,3 +35,7 @@ type Event struct {
 	Params interface{} `json:"params,omitempty"` // 请求参数
 	Data   interface{} `json:"data"`             // 响应参数
 }
+
+type NormalMsgParams struct {
+	Msg string `json:"msg"`
+}
