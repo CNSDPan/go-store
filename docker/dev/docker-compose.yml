@@ -49,7 +49,7 @@ services:
     command: /bin/bash -c "cd /var/www/store&&./rpc_socket.bin module service >> tmp/rpc-socket.err"
     networks:
       store:
-        ipv4_address: 172.20.2.101
+        ipv4_address: 172.20.2.102
   api:
     container_name: api
     #使用别人的构造器
