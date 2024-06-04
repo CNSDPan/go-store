@@ -8,7 +8,7 @@ import (
 var AloneRedisClient *redis.Client
 
 // InitAloneRedis
-// @Auth：parker
+// @Auth：
 // @Desc：初始化单机Redis
 // @Date：2024-06-01 16:38:50
 // @return：error

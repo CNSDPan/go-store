@@ -32,7 +32,7 @@ type Server struct {
 }
 
 // Bucket
-// @Auth：parker
+// @Auth：
 // @Desc：连接池
 // @Date：2024-05-23 10:43:39
 type Bucket struct {
@@ -43,7 +43,7 @@ type Bucket struct {
 }
 
 // NewServer
-// @Auth：parker
+// @Auth：
 // @Desc：初始化Server
 // @Date：2024-05-14 14:32:44
 // @return：*Server
@@ -52,7 +52,7 @@ func NewServer() *Server {
 }
 
 // StartWebsocket
-// @Auth：parker
+// @Auth：
 // @Desc：启动websocket服务
 // @Date：2024-05-14 14:34:52
 // @receiver：s
@@ -64,7 +64,7 @@ func (s *Server) StartWebsocket() {
 }
 
 // getBucket
-// @Auth：parker
+// @Auth：
 // @Desc：通过群聊房间ID得出所在连接池
 // @Date：2024-05-28 14:24:13
 // @receiver：s
@@ -77,7 +77,7 @@ func (s *Server) getBucket(roomId int64) *Bucket {
 }
 
 // writeMessage
-// @Auth：parker
+// @Auth：
 // @Desc：写消息的
 // @Date：2024-05-22 15:47:30
 // @receiver：s
@@ -121,7 +121,7 @@ func (s *Server) writeChannel(client *Client) {
 }
 
 // writeMessage
-// @Auth：parker
+// @Auth：
 // @Desc：读消息的
 // @Date：2024-05-22 15:47:30
 // @receiver：s

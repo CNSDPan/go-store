@@ -17,6 +17,7 @@ type Request struct {
 type Response struct {
 	Code         string      `json:"code"`
 	Message      string      `json:"message"`
+	ErrMessage   string 	`json:"errMessage"`
 	ResponseTime string      `json:"responseTime"`
 	Data         interface{} `json:"data"`
 }

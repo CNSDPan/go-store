@@ -34,7 +34,7 @@ func init() {
 }
 
 // initDB
-// @Auth：parker
+// @Auth：
 // @Desc：单个数据库实例
 // @Date：2024-04-15 17:15:45
 // @param：c
@@ -61,7 +61,7 @@ func initDB(c *yaml.MysqlConf) {
 }
 
 // initRWDB
-// @Auth：parker
+// @Auth：
 // @Desc：mysql主从模式下读写分离实例
 // @Date：2024-04-17 18:09:26
 // @param：c
@@ -105,7 +105,7 @@ func initRWDB(c *yaml.MysqlConf, logg logx.Logger) {
 }
 
 // GetReadDB
-// @Auth：parker
+// @Auth：
 // @Desc：获取连接池的DB
 // @Date：2024-04-15 13:41:29
 // @param：dbName

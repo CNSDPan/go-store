@@ -28,3 +28,12 @@ const (
 	USER_INFO_FAIL = "10101"
 	USER_ID_FAIL   = "10102"
 )
+
+// Author：parker
+// Desc：rpc-socket模块code
+// Date：
+const (
+	SOCKET_BROADCAST_LOGIN  = "20101"
+	SOCKET_BROADCAST_LOGOUT = "20102"
+	SOCKET_BROADCAST_NORMAL = "20103"
+)

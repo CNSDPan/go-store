@@ -20,7 +20,7 @@ type Client struct {
 }
 
 // NewClient
-// @Auth：parker
+// @Auth：
 // @Desc：初始化一个用户连接
 // @Date：2024-05-08 14:11:30
 // @param：clientId

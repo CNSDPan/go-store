@@ -54,7 +54,7 @@ func New(url string) (tClient *TestClient, err error) {
 }
 
 // Auth
-// @Auth：parker
+// @Auth：
 // @Desc：连接事件
 // @Date：2024-05-29 11:35:42
 // @receiver：t

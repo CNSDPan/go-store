@@ -2,12 +2,11 @@ package types
 
 import (
 	"fmt"
-	"github.com/zeromicro/go-zero/core/logx"
 	"store/common"
 	"time"
 )
 
-func ResponseWithCode(res *Response, logger logx.Logger) {
+func ResponseWithCode(res *Response) {
 	defer func() {
 		res.ResponseTime = time.Now().Format("2006-01-02 15:04:05")
 		if res.Code != common.RESPONSE_SUCCESS {
@@ -16,10 +15,14 @@ func ResponseWithCode(res *Response, logger logx.Logger) {
 	}()
 
 	defaultCodeMsg := common.ReturnOverCodeMessage()
+	if res.Code == common.RESPONSE_SUCCESS {
+		res.Message = defaultCodeMsg[res.Code]
+		return
+	}
 	if codeMsg, err := common.ReturnCodeMessage(); err != nil {
-		logger.Errorf("get common.ReturnCodeMessage fail:", err.Error())
 		res.Code = common.RESPONSE_FAIL
 		res.Message = defaultCodeMsg[res.Code]
+		res.ErrMessage = "comm ResponseWithCode fail:" + err.Error()
 	} else {
 		msg := ""
 		ok := false

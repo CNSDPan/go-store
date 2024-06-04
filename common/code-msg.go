@@ -2,6 +2,7 @@ package common
 
 import (
 	"errors"
+	"fmt"
 	"github.com/imdario/mergo"
 )
 
@@ -23,8 +24,14 @@ var codeMessageByUser = map[string]string{
 	USER_ID_FAIL:   "用户ID不存在|错误",
 }
 
+var codeMessageBySocket = map[string]string{
+	SOCKET_BROADCAST_LOGIN:  "socket连接错误",
+	SOCKET_BROADCAST_LOGOUT: "socket关闭错误",
+	SOCKET_BROADCAST_NORMAL: "socket广播消息错误",
+}
+
 // ReturnOverCodeMessage
-// @Auth：parker
+// @Auth：
 // @Desc：全局的codeMsg
 // @Date：2024-04-10 16:29:07
 // @return：map[string]string
@@ -33,7 +40,7 @@ func ReturnOverCodeMessage() map[string]string {
 }
 
 // ReturnCodeMessage
-// @Auth：parker
+// @Auth：
 // @Desc：集合所有code对应得msg，并返回完整map
 // @Date：2024-04-10 16:26:26
 // @return：map[string]string
@@ -47,6 +54,41 @@ func ReturnCodeMessage() (map[string]string, error) {
 	if err = mergo.Merge(&codeMsg, codeMessageByUser); err != nil {
 		goto res
 	}
+	if err = mergo.Merge(&codeMsg, codeMessageBySocket); err != nil {
+		goto res
+	}
 res:
 	return codeMsg, err
+}
+
+// GetCodeMessage
+// @Auth：
+// @Desc：获取codeMsg
+// @Date：2024-06-04 17:36:49
+// @param：code
+// @return：string code
+// @return：string msg
+// @return：error
+func GetCodeMessage(code string) (string, string, error) {
+	var (
+		codeMsg map[string]string
+		message string
+		err     error
+		ok      bool
+	)
+	defaultCodeMsg := ReturnOverCodeMessage()
+	if code == RESPONSE_SUCCESS {
+		return code, defaultCodeMsg[code], nil
+	}
+
+	if codeMsg, err = ReturnCodeMessage(); err != nil {
+		message = defaultCodeMsg[RESPONSE_FAIL]
+	} else {
+		if message, ok = codeMsg[code]; !ok {
+			message = defaultCodeMsg[RESPONSE_NOT_CODE]
+			code = RESPONSE_NOT_CODE
+			err = errors.New(fmt.Sprintf("%s code:%s", defaultCodeMsg[RESPONSE_NOT_CODE], code))
+		}
+	}
+	return code, message, err
 }

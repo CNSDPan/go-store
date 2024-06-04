@@ -1,7 +1,7 @@
 package types
 
 // Msg
-// @Auth：parker
+// @Auth：
 // @Desc：服务端websocket推送到客户端的消息
 // @Date：2024-05-23 11:08:16
 type Msg struct {
@@ -14,7 +14,7 @@ type Msg struct {
 }
 
 // ReceiveMsg
-// @Auth：parker
+// @Auth：
 // @Desc：客户端websocket推送到服务端的消息
 // @Date：2024-05-23 17:28:07
 type ReceiveMsg struct {

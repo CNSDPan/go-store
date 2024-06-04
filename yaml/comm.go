@@ -16,7 +16,7 @@ func getCurrentDir() string {
 }
 
 // GetRpcApiConf
-// @Auth：parker
+// @Auth：
 // @Desc：获取rpc-api的配置文件信息
 // @Date：2024-04-15 14:30:45
 // @return：zrpc.RpcClientConf
@@ -31,7 +31,7 @@ func GetRpcApiConf() zrpc.RpcClientConf {
 }
 
 // GetRpcWebsocketConf
-// @Auth：parker
+// @Auth：
 // @Desc：获取rpc-websocket的配置文件信息
 // @Date：2024-05-10 11:29:23
 // @return：zrpc.RpcClientConf

@@ -50,7 +50,7 @@ func userTest() map[string]map[string]interface{} {
 }
 
 // Connect
-// @Auth：parker
+// @Auth：
 // @Desc：连接事件
 // @Date：2024-05-28 11:52:51
 // @receiver：clientManager
@@ -75,7 +75,7 @@ func (clientM *ClientManager) Connect(autoToken string) (userId int64, clientId 
 }
 
 // DisConnect
-// @Auth：parker
+// @Auth：
 // @Desc：断链事件
 // @Date：2024-05-27 17:44:32
 // @receiver：client
@@ -85,7 +85,7 @@ func (clientM *ClientManager) DisConnect() {
 }
 
 // NewBuckets
-// @Auth：parker
+// @Auth：
 // @Desc：初始化websocket连接池
 // @Date：2024-05-14 14:11:27
 // @param：bucketNumber 池子数量
@@ -103,7 +103,7 @@ func NewBuckets(bucketNumber uint) []*Bucket {
 }
 
 // putBucket
-// @Auth：parker
+// @Auth：
 // @Desc：加入某个池子的
 // @Date：2024-05-28 17:56:51
 // @receiver：b
@@ -118,7 +118,7 @@ func (b *Bucket) putBucket(client *Client, roomId int64) {
 }
 
 // DelBucket
-// @Auth：parker
+// @Auth：
 // @Desc：移出池子
 // @Date：2024-05-29 10:36:35
 // @receiver：b
@@ -132,7 +132,7 @@ func (b *Bucket) DelBucket(client *Client) {
 }
 
 // MethodHandle
-// @Auth：parker
+// @Auth：
 // @Desc：事件处理
 // @Date：2024-05-30 15:30:41
 // @receiver：clientM

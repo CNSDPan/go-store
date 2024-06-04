@@ -3,7 +3,7 @@ package tools
 import "github.com/shopspring/decimal"
 
 // EnterExchange
-// @Auth：parker
+// @Auth：
 // @Desc：统一入库金额换算,将金额 * 10000
 // @Date：2024-04-19 18:28:20
 // @param：price 只支持 int | int8 | int32 | int64 | float32 | float64
@@ -34,7 +34,7 @@ func EnterExchange(price interface{}) (dbPrice int64) {
 }
 
 // OutExchange
-// @Auth：parker
+// @Auth：
 // @Desc：统一出库金额显示转换，将 数据表 的 金额 / 10000
 // @Date：2024-04-23 17:32:40
 // @param：price
