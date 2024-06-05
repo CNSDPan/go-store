@@ -15,9 +15,12 @@ import (
 type (
 	EventNoraml        = socket.EventNoraml
 	ReqBroadcastNormal = socket.ReqBroadcastNormal
+	ReqPing            = socket.ReqPing
+	ResPong            = socket.ResPong
 	ResSuccess         = socket.ResSuccess
 
 	Socket interface {
+		Ping(ctx context.Context, in *ReqPing, opts ...grpc.CallOption) (*ResPong, error)
 		Broadcast(ctx context.Context, in *ReqBroadcastNormal, opts ...grpc.CallOption) (*ResSuccess, error)
 	}
 
@@ -30,6 +33,11 @@ func NewSocket(cli zrpc.Client) Socket {
 	return &defaultSocket{
 		cli: cli,
 	}
+}
+
+func (m *defaultSocket) Ping(ctx context.Context, in *ReqPing, opts ...grpc.CallOption) (*ResPong, error) {
+	client := socket.NewSocketClient(m.cli.Conn())
+	return client.Ping(ctx, in, opts...)
 }
 
 func (m *defaultSocket) Broadcast(ctx context.Context, in *ReqBroadcastNormal, opts ...grpc.CallOption) (*ResSuccess, error) {

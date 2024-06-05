@@ -71,6 +71,27 @@ services:
     networks:
       store:
         ipv4_address: 172.20.2.101
+  websocket-1:
+    container_name: websocket-1
+    #使用别人的构造器
+    image: debian:latest
+    #    build:
+    #      context: ${APP_PATH}
+    #      dockerfile: api/Dockerfile
+    ports:
+      - "6991:8888"
+    environment:
+      - TZ=${TZ}
+    volumes:
+      - ${APP_PATH}/websocket/bin/websocket.bin:${MOUNT_PATH}/websocket.bin
+      - ${APP_PATH}/websocket/etc:${MOUNT_PATH}/etc
+      - ${APP_PATH}/tmp/:${MOUNT_PATH}/tmp
+      - ${APP_PATH}/yaml/:${MOUNT_PATH}/yaml
+      - ${APP_PATH}/common/:${MOUNT_PATH}/common
+    command: /bin/bash -c "cd /var/www/store&&./websocket.bin module websocket >> tmp/websocket.err"
+    networks:
+      store:
+        ipv4_address: 172.20.2.198
 networks:
   store:
     name: store

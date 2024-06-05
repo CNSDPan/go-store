@@ -3,6 +3,14 @@ syntax = "proto3";
 package socket;
 option go_package="./socket";
 
+message ReqPing{
+  string ping = 1;
+}
+
+message ResPong {
+  string pong = 1;
+}
+
 message EventNoraml {
   string params = 1;
 }
@@ -28,5 +36,6 @@ message ResSuccess {
 }
 
 service Socket {
+  rpc Ping(ReqPing) returns(ResPong);
   rpc Broadcast(ReqBroadcastNormal) returns(ResSuccess);
 }

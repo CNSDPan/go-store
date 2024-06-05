@@ -8,11 +8,13 @@ import (
 	"github.com/zeromicro/go-zero/core/conf"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/rest"
+	"github.com/zeromicro/go-zero/zrpc"
 	"net/http"
 	"store/websocket/internal/config"
 	"store/websocket/internal/handler"
 	"store/websocket/internal/server"
 	"store/websocket/internal/svc"
+	"store/yaml"
 	"strconv"
 )
 
@@ -20,8 +22,13 @@ var configFile = flag.String("f", "etc/websocket-api.yaml", "the config file")
 
 func main() {
 	flag.Parse()
-
-	var c config.Config
+	var (
+		c      config.Config
+		nodeId int64
+		node   *snowflake.Node
+		err    error
+		pong   string
+	)
 	conf.MustLoad(*configFile, &c)
 
 	s := rest.MustNewServer(c.RestConf)
@@ -30,15 +37,21 @@ func main() {
 	handler.RegisterHandlers(s, ctx)
 
 	// 服务uuid节点池
-	var nodeId int64
-	var node *snowflake.Node
-	var err error
 	if nodeId, err = strconv.ParseInt(c.ServiceId, 10, 64); err != nil {
 		panic("服务-websocket serverId server string to int64 fail:" + err.Error())
 	}
 	if node, err = snowflake.NewNode(nodeId); err != nil {
 		panic("服务-websocket start server newNode func fail:" + err.Error())
 	}
+	// 初始grpc
+	wbc := yaml.WebSocketConf
+	pong, err = server.InitGrpcSocket(zrpc.RpcClientConf{
+		Etcd: wbc.Etcd,
+	})
+	if err != nil {
+		panic("服务-websocket InitGrpcSocket fail:" + err.Error())
+	}
+	fmt.Printf("服务-websocket InitGrpcSocket ok pong:%s", pong)
 	// 初始化连接池
 	buckets := server.NewBuckets(c.BucketNumber)
 	// 初始化websocket服务
