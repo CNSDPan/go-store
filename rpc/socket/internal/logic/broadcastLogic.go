@@ -3,7 +3,6 @@ package logic
 import (
 	"context"
 	"store/common"
-	"store/rpc/socket/internal/server"
 	"store/rpc/socket/internal/svc"
 	"store/rpc/socket/pb/socket"
 
@@ -50,7 +49,7 @@ func (l *BroadcastLogic) Broadcast(in *socket.ReqBroadcastNormal) (*socket.ResSu
 		}
 	}()
 
-	if err = server.AloneRedisClient.LPushX(common.Redis_Socket_Message_Normal_Key, in.Event.Params).Err(); err != nil {
+	if err = AloneRedisClient.LPushX(common.Redis_Socket_Message_Normal_Key, in.Event.Params).Err(); err != nil {
 		res.Code = common.SOCKET_BROADCAST_NORMAL
 	}
 	return &socket.ResSuccess{}, nil

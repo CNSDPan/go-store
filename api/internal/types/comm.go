@@ -19,19 +19,14 @@ func ResponseWithCode(res *Response) {
 		res.Message = defaultCodeMsg[res.Code]
 		return
 	}
-	if codeMsg, err := common.ReturnCodeMessage(); err != nil {
-		res.Code = common.RESPONSE_FAIL
-		res.Message = defaultCodeMsg[res.Code]
-		res.ErrMessage = "comm ResponseWithCode fail:" + err.Error()
-	} else {
-		msg := ""
-		ok := false
-		if msg, ok = codeMsg[res.Code]; !ok {
-			code := common.RESPONSE_NOT_CODE
-			msg = fmt.Sprintf("%s code:%s", codeMsg[code], res.Code)
-			res.Code = code
-		}
-		res.Message = msg
+	codeMsg := common.ReturnCodeMessage()
+	msg := ""
+	ok := false
+	if msg, ok = codeMsg[res.Code]; !ok {
+		code := common.RESPONSE_NOT_CODE
+		msg = fmt.Sprintf("%s code:%s", codeMsg[code], res.Code)
+		res.Code = code
 	}
+	res.Message = msg
 	return
 }

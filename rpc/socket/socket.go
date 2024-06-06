@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"store/rpc/socket/internal/logic"
 
 	"store/rpc/socket/internal/config"
 	"store/rpc/socket/internal/server"
@@ -34,7 +35,7 @@ func main() {
 	})
 	defer s.Stop()
 	// 初始化redis
-	if err := server.InitAloneRedis(); err != nil {
+	if err := logic.InitAloneRedis(); err != nil {
 		panic("rpc.socket init alone redis panic:" + err.Error())
 	}
 	fmt.Printf("Starting rpc server at %s...\n", c.ListenOn)

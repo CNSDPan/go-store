@@ -3,7 +3,6 @@ package common
 import (
 	"errors"
 	"fmt"
-	"github.com/imdario/mergo"
 )
 
 var codeMessage = map[string]string{
@@ -45,20 +44,18 @@ func ReturnOverCodeMessage() map[string]string {
 // @Date：2024-04-10 16:26:26
 // @return：map[string]string
 // @return：error
-func ReturnCodeMessage() (map[string]string, error) {
+func ReturnCodeMessage() map[string]string {
 	codeMsg := make(map[string]string)
-	err := errors.New("")
-	if err = mergo.Merge(&codeMsg, codeMessage); err != nil {
-		goto res
+	mergeMap := func(codeMsg map[string]string, m map[string]string) map[string]string {
+		for key, value := range m {
+			codeMsg[key] = value
+		}
+		return codeMsg
 	}
-	if err = mergo.Merge(&codeMsg, codeMessageByUser); err != nil {
-		goto res
-	}
-	if err = mergo.Merge(&codeMsg, codeMessageBySocket); err != nil {
-		goto res
-	}
-res:
-	return codeMsg, err
+	codeMsg = mergeMap(codeMsg, codeMessage)
+	codeMsg = mergeMap(codeMsg, codeMessageByUser)
+	codeMsg = mergeMap(codeMsg, codeMessageBySocket)
+	return codeMsg
 }
 
 // GetCodeMessage
@@ -80,15 +77,11 @@ func GetCodeMessage(code string) (string, string, error) {
 	if code == RESPONSE_SUCCESS {
 		return code, defaultCodeMsg[code], nil
 	}
-
-	if codeMsg, err = ReturnCodeMessage(); err != nil {
-		message = defaultCodeMsg[RESPONSE_FAIL]
-	} else {
-		if message, ok = codeMsg[code]; !ok {
-			message = defaultCodeMsg[RESPONSE_NOT_CODE]
-			code = RESPONSE_NOT_CODE
-			err = errors.New(fmt.Sprintf("%s code:%s", defaultCodeMsg[RESPONSE_NOT_CODE], code))
-		}
+	codeMsg = ReturnCodeMessage()
+	if message, ok = codeMsg[code]; !ok {
+		message = defaultCodeMsg[RESPONSE_NOT_CODE]
+		code = RESPONSE_NOT_CODE
+		err = errors.New(fmt.Sprintf("%s code:%s", defaultCodeMsg[RESPONSE_NOT_CODE], code))
 	}
 	return code, message, err
 }

@@ -12,6 +12,7 @@ services:
       - TZ=${TZ}
     tty: true
     volumes:
+      - ${GO_PKG_MOD}/:/go/pkg/mod
       - ${PRO_PATH}/:${MOUNT_PRO_PATH}
     networks:
       store:
