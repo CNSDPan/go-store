@@ -1,6 +1,11 @@
 package server
 
 import (
+	"context"
+	"errors"
+	"github.com/zeromicro/go-zero/core/logx"
+	"store/common"
+	"store/rpc/socket/pb/socket"
 	"store/tools"
 	"store/websocket/internal/types"
 	"strconv"
@@ -137,12 +142,53 @@ func (b *Bucket) DelBucket(client *Client) {
 // @Date：2024-05-30 15:30:41
 // @receiver：clientM
 // @param：msg
-func (clientM *ClientManager) MethodHandle(msg types.ReceiveMsg) {
+func (clientM *ClientManager) MethodHandle(msg types.ReceiveMsg, l logx.Logger) (code string, message string, err error) {
+	var (
+		fromClientId int64
+		toClientId   int64
+		res          *socket.ResSuccess
+	)
+	defer func() {
+		if err != nil {
+			code = common.RESPONSE_FAIL
+			message = common.ReturnCodeMessage()[code]
+		} else {
+			code = "200"
+			message = ""
+		}
+	}()
+	if fromClientId, err = strconv.ParseInt(msg.FromClientId, 10, 64); err != nil {
+		goto EndHandle
+	}
+	if toClientId, err = strconv.ParseInt(msg.ToClientId, 10, 64); err != nil {
+		goto EndHandle
+	}
 	switch msg.Method {
 	case "Enter":
 	case "Out":
-	case "Speak":
+	case "Normal":
+		params, ok := msg.Event.Params.(string)
+		if !ok {
+			err = errors.New("msg.Event.Params interface to string not ok")
+			goto EndHandle
+		}
+		res, err = GrpcSocketClient.Broadcast(context.Background(), &socket.ReqBroadcastNormal{
+			Version:      int32(msg.Version),
+			Operate:      int32(msg.Operate),
+			Method:       msg.Method,
+			Event:        &socket.EventNoraml{Params: params},
+			RoomId:       msg.RoomId,
+			FromClientId: fromClientId,
+			ToClientId:   toClientId,
+			Msg:          "",
+			Extend:       msg.Extend,
+			AutoToken:    msg.AuthToken,
+		})
 	case "Server":
-
+	default:
+		res.Code = common.RESPONSE_FAIL
+		res.Msg = "无效操作"
 	}
+EndHandle:
+	return code, message, err
 }

@@ -6,7 +6,7 @@ import (
 	"store/rpc/socket/socketClient"
 )
 
-var GrpcSocketClient *socketClient.Socket
+var GrpcSocketClient socketClient.Socket
 
 func InitGrpcSocket(c zrpc.RpcClientConf) (string, error) {
 	var (
@@ -17,7 +17,7 @@ func InitGrpcSocket(c zrpc.RpcClientConf) (string, error) {
 	client := socketClient.NewSocket(conn)
 	res, err = client.Ping(context.Background(), &socketClient.ReqPing{})
 	if err == nil {
-		GrpcSocketClient = &client
+		GrpcSocketClient = client
 	}
 	return res.Pong, err
 }

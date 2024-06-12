@@ -39,9 +39,11 @@ func New(url string) (tClient *TestClient, err error) {
 	//var d *websocket.Dialer
 	//d.HandshakeTimeout = 30 * time.Second
 	//conn, res, err := d.Dial(url, nil)
-	conn, res, err := websocket.DefaultDialer.Dial("ws://127.0.0.1:7000/ws", nil)
+	fmt.Println(url)
+	conn, res, err := websocket.DefaultDialer.Dial(url, nil)
 	if err != nil {
-		log.Println("拨号失败:", res)
+		log.Printf("拨号失败:%v fail:%v", res, err)
+
 		return nil, err
 	}
 	return &TestClient{
@@ -86,10 +88,10 @@ func (t *TestClient) Send() {
 		r := ReceiveMsg{
 			Version: 1,
 			Operate: 3,
-			Method:  "Msg",
+			Method:  "Normal",
 			RoomId:  1,
 			Msg:     "普通消息",
-			Event:   Event{Params: ""},
+			Event:   Event{Params: "消息"},
 		}
 		for {
 			msg := <-t.sendMsgChan

@@ -21,7 +21,7 @@ import (
 var configFile = flag.String("f", "etc/websocket-api.yaml", "the config file")
 
 func main() {
-	flag.Parse()
+	fmt.Println(fmt.Sprintln("Start websocket server ...\n "))
 	var (
 		c      config.Config
 		nodeId int64
@@ -29,13 +29,12 @@ func main() {
 		err    error
 		pong   string
 	)
+	flag.Parse()
 	conf.MustLoad(*configFile, &c)
-
 	s := rest.MustNewServer(c.RestConf)
 	defer s.Stop()
 	ctx := svc.NewServiceContext(c)
 	handler.RegisterHandlers(s, ctx)
-
 	// 服务uuid节点池
 	if nodeId, err = strconv.ParseInt(c.ServiceId, 10, 64); err != nil {
 		panic("服务-websocket serverId server string to int64 fail:" + err.Error())
@@ -51,7 +50,7 @@ func main() {
 	if err != nil {
 		panic("服务-websocket InitGrpcSocket fail:" + err.Error())
 	}
-	fmt.Printf("服务-websocket InitGrpcSocket ok pong:%s", pong)
+	fmt.Println(fmt.Sprintf("服务-websocket InitGrpcSocket ok pong:%s", pong))
 	// 初始化连接池
 	buckets := server.NewBuckets(c.BucketNumber)
 	// 初始化websocket服务
@@ -72,6 +71,12 @@ func main() {
 		},
 	})
 
-	fmt.Printf("Starting websocket server at %s:%d...\n", c.Host, c.Port)
+	// 初始化订阅redis
+	_, err = server.NewSubscribe(webServer.Log)
+	if err != nil {
+		panic("服务-websocket NewSubscribe fail:" + err.Error())
+	}
+
+	fmt.Println(fmt.Sprintf("Starting websocket server at %s:%d...\n", c.Host, c.Port))
 	s.Start()
 }

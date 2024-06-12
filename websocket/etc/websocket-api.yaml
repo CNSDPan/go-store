@@ -1,6 +1,6 @@
 Name: websocket-api
 Host: 0.0.0.0
-Port: 7000
+Port: 8888
 #对称加密key
 CryptoKey: "Adba723b7fe06819"
 #ServiceId must be between 0 and 1023

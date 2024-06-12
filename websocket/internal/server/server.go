@@ -92,7 +92,7 @@ func (s *Server) writeChannel(client *Client) {
 		select {
 		case message, ok := <-client.Broadcast:
 			// 每次写之前，都需要设置超时时间，如果只设置一次就会出现总是超时
-			client.Websocket.SetWriteDeadline(time.Now().Add(WriteWait))
+			_ = client.Websocket.SetWriteDeadline(time.Now().Add(WriteWait))
 			if !ok {
 				s.Log.Error("server websocket client.Broadcast not ok ")
 				_ = client.Websocket.WriteMessage(websocket.CloseMessage, []byte{})
@@ -126,6 +126,11 @@ func (s *Server) writeChannel(client *Client) {
 // @Date：2024-05-22 15:47:30
 // @receiver：s
 func (s *Server) readChannel(client *Client) {
+	var (
+		methodCode string
+		methodMsg  string
+		methodErr  error
+	)
 	defer func() {
 		//移出连接池
 		if client.RoomId == 0 || client.UserId == 0 {
@@ -158,39 +163,61 @@ func (s *Server) readChannel(client *Client) {
 			s.Log.Errorf("server websocket.message json.Unmarshal websocketMsg fail:%s", err.Error())
 			continue
 		}
+		if websocketMsg.FromClientId == "" {
+			websocketMsg.FromClientId = "0"
+		}
+		if websocketMsg.ToClientId == "" {
+			websocketMsg.ToClientId = "0"
+		}
 		client.AutoToken = websocketMsg.AuthToken
 		client.RoomId = websocketMsg.RoomId
 
 		client.Websocket.SetReadLimit(MaxMessageSize)
-		client.Websocket.SetReadDeadline(time.Now().Add(ReadWait))
+		_ = client.Websocket.SetReadDeadline(time.Now().Add(ReadWait))
 		client.Websocket.SetPongHandler(func(string) error {
-			client.Websocket.SetReadDeadline(time.Now().Add(PongPeriod))
+			_ = client.Websocket.SetReadDeadline(time.Now().Add(PongPeriod))
 			return nil
 		})
 		switch websocketMsg.Operate {
 		case OperateSingleMsg:
 		case OperateGroupMsg:
-			client.Broadcast <- types.Msg{
-				Version:      1,
-				Operate:      3,
-				Method:       "Msg",
-				SendClientId: 0,
-				Extend:       "",
-				Body:         []byte("给自己发送消息"),
-			}
-			s.Log.Infof("打印发送群消息%v", websocketMsg.Event)
+			methodCode, methodMsg, methodErr = s.ClientManager.MethodHandle(websocketMsg, s.Log)
 		case OperateConn:
 			// client与server建立websocket成功后，client推送一次操作事件Operate:10，server将其进行连接池分组
 			client.UserId, client.ClientId = s.ClientManager.Connect(client.AutoToken)
 			if client.UserId == 0 {
 				s.Log.Errorf("server websocket ClientManager.Connect user undefined by token:%s", client.AutoToken)
 				return
+
 			}
 			// 获取要加入加入池子
 			bucket := s.getBucket(websocketMsg.RoomId)
 			s.Log.Infof("server websocket autoToken:%s bucket.Idx:%d", client.AutoToken, bucket.Idx)
 			bucket.putBucket(client, websocketMsg.RoomId)
 			// 请求grpc广播消息，通知群有用户进入群聊
+		}
+		s.Log.Infof("读消息管道：echo websocketMsg.Operate:%d methodCode:%s methodMsg:%s", websocketMsg.Operate, methodCode, methodMsg)
+		if methodErr != nil {
+			s.Log.Errorf("读消息管道：echo websocketMsg.Operate:%d methodErr:%s", websocketMsg.Operate, methodErr.Error())
+		}
+	}
+}
+
+// readSubWriteMsg
+// @Auth：
+// @Desc：处理消息，并发送房间内的人
+// @Date：2024-06-12 18:05:19
+// @receiver：s
+func (s *Server) readSubWriteMsg() {
+	select {
+	case writeMsg := <-SubWriteMsg:
+		b := s.getBucket(writeMsg.SendRoomId)
+		clients := b.Rooms[writeMsg.SendRoomId]
+		for _, clientId := range clients {
+			client, ok := b.Clients[clientId]
+			if ok {
+				client.Broadcast <- writeMsg
+			}
 		}
 	}
 }

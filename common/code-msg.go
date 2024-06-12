@@ -1,9 +1,6 @@
 package common
 
-import (
-	"errors"
-	"fmt"
-)
+import "fmt"
 
 var codeMessage = map[string]string{
 	RESPONSE_SUCCESS:           "success",
@@ -66,22 +63,20 @@ func ReturnCodeMessage() map[string]string {
 // @return：string code
 // @return：string msg
 // @return：error
-func GetCodeMessage(code string) (string, string, error) {
+func GetCodeMessage(code string) (string, string) {
 	var (
 		codeMsg map[string]string
 		message string
-		err     error
 		ok      bool
 	)
 	defaultCodeMsg := ReturnOverCodeMessage()
 	if code == RESPONSE_SUCCESS {
-		return code, defaultCodeMsg[code], nil
+		return code, defaultCodeMsg[code]
 	}
 	codeMsg = ReturnCodeMessage()
 	if message, ok = codeMsg[code]; !ok {
-		message = defaultCodeMsg[RESPONSE_NOT_CODE]
+		message = defaultCodeMsg[RESPONSE_NOT_CODE] + fmt.Sprintf("; code: %s", code)
 		code = RESPONSE_NOT_CODE
-		err = errors.New(fmt.Sprintf("%s code:%s", defaultCodeMsg[RESPONSE_NOT_CODE], code))
 	}
-	return code, message, err
+	return code, message
 }

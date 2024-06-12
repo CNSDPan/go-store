@@ -16,7 +16,7 @@ type Client struct {
 	UserId      int64
 	Extend      string
 	BucketId    string
-	Broadcast   chan types.Msg // 通过管道实时监控消息
+	Broadcast   chan types.WriteMsg // 通过管道实时监控消息
 }
 
 // NewClient
@@ -31,6 +31,6 @@ func NewClient(conn *websocket.Conn) *Client {
 		Websocket:   conn,
 		ConnectTime: uint64(time.Now().Unix()),
 		Extend:      "",
-		Broadcast:   make(chan types.Msg, 100),
+		Broadcast:   make(chan types.WriteMsg, 10000),
 	}
 }
