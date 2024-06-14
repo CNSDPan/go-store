@@ -25,7 +25,7 @@ func TestAloneRedisPub(t *testing.T) {
 						return
 					}
 					aloneRedisClient.Publish(common.PubSubSocketMessageNormalChannelKey, fmt.Sprintf("发布消息：%d", num2))
-					//fmt.Printf("发布消息 %d", num)
+					fmt.Printf("发布消息 %d", num2)
 				}
 			}
 		}()

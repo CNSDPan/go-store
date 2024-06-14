@@ -28,6 +28,7 @@ func main() {
 		node   *snowflake.Node
 		err    error
 		pong   string
+		l      = logx.WithContext(context.Background())
 	)
 	flag.Parse()
 	conf.MustLoad(*configFile, &c)
@@ -42,6 +43,10 @@ func main() {
 	if node, err = snowflake.NewNode(nodeId); err != nil {
 		panic("服务-websocket start server newNode func fail:" + err.Error())
 	}
+	// 初始化redis
+	if err = server.InitAloneRedis(); err != nil {
+		panic("服务-websocket InitAloneRedis fail:" + err.Error())
+	}
 	// 初始grpc
 	wbc := yaml.WebSocketConf
 	pong, err = server.InitGrpcSocket(zrpc.RpcClientConf{
@@ -51,6 +56,7 @@ func main() {
 		panic("服务-websocket InitGrpcSocket fail:" + err.Error())
 	}
 	fmt.Println(fmt.Sprintf("服务-websocket InitGrpcSocket ok pong:%s", pong))
+
 	// 初始化连接池
 	buckets := server.NewBuckets(c.BucketNumber)
 	// 初始化websocket服务
@@ -58,7 +64,7 @@ func main() {
 	webServer.Buckets = buckets
 	webServer.BucketIdx = uint32(len(buckets))
 	webServer.ServerId = c.ServiceId
-	webServer.Log = logx.WithContext(context.Background())
+	webServer.Log = l
 	webServer.Node = node
 	// 启动websocket服务
 	//webServer.StartWebsocket()
@@ -72,10 +78,13 @@ func main() {
 	})
 
 	// 初始化订阅redis
-	_, err = server.NewSubscribe(webServer.Log)
+	var subscribeServer *server.Subscribe
+	subscribeServer, err = server.NewSubscribe()
 	if err != nil {
 		panic("服务-websocket NewSubscribe fail:" + err.Error())
 	}
+	subscribeServer.Log = l
+	subscribeServer.SubReceive()
 
 	fmt.Println(fmt.Sprintf("Starting websocket server at %s:%d...\n", c.Host, c.Port))
 	s.Start()

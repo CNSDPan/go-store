@@ -15,22 +15,13 @@ type Subscribe struct {
 
 var SubWriteMsg = make(chan types.WriteMsg, 10000)
 
-func NewSubscribe(log logx.Logger) (*Subscribe, error) {
-	var (
-		subscribe *Subscribe
-		err       error
-	)
-	// 订阅redis的广播消息初始
+func NewSubscribe() (*Subscribe, error) {
 	pubSub := AloneRedisClient.Subscribe(common.PubSubSocketMessageNormalChannelKey)
-	_, err = pubSub.Receive()
-	if err != nil {
+	if _, err := pubSub.Receive(); err != nil {
 		_ = pubSub.Close()
-		return subscribe, err
+		return nil, err
 	}
-	subscribe.Log = log
-	subscribe.PubSub = pubSub
-	go subscribe.SubReceive()
-	return subscribe, nil
+	return &Subscribe{PubSub: pubSub}, nil
 }
 
 // SubReceive
@@ -39,16 +30,18 @@ func NewSubscribe(log logx.Logger) (*Subscribe, error) {
 // @Date：2024-06-12 17:52:49
 // @receiver：sub
 func (sub *Subscribe) SubReceive() {
-	var err error
-	// 接收消息
-	ch := sub.PubSub.ChannelSize(MaxMessageSize)
-	for msg := range ch {
-		var writeMsg types.WriteMsg
-		b := []byte(msg.Payload)
-		if err = jsonx.Unmarshal(b, &writeMsg); err != nil {
-			sub.Log.Errorf("server subscribe Receive Channel:%s json.Unmarshal  fail:%s", msg.Channel, err.Error())
-			continue
+	go func() {
+		var err error
+		// 接收消息
+		ch := sub.PubSub.ChannelSize(MaxMessageSize)
+		for msg := range ch {
+			var writeMsg types.WriteMsg
+			b := []byte(msg.Payload)
+			if err = jsonx.Unmarshal(b, &writeMsg); err != nil {
+				sub.Log.Errorf("订阅消息服务 Receive Channel:%s json.Unmarshal  fail:%s", msg.Channel, err.Error())
+				continue
+			}
+			SubWriteMsg <- writeMsg
 		}
-		SubWriteMsg <- writeMsg
-	}
+	}()
 }

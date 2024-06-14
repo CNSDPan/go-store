@@ -123,7 +123,7 @@ func (t *TestClient) Read() {
 				t.recvMsgChan <- "读取失败：" + err.Error()
 				break
 			}
-			t.recvMsgChan <- "读取" + strconv.Itoa(mType) + string(b)
+			t.recvMsgChan <- "读取 " + strconv.Itoa(mType) + string(b)
 		}
 	}()
 }

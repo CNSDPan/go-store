@@ -11,6 +11,8 @@ import (
 	"strconv"
 )
 
+var modult = "websocket服务下的ClientManager"
+
 type ClientM interface {
 	Connect()
 	DisConnect()
@@ -131,7 +133,16 @@ func (b *Bucket) putBucket(client *Client, roomId int64) {
 func (b *Bucket) DelBucket(client *Client) {
 	b.CLock.Lock()
 	defer b.CLock.Unlock()
-	delete(b.Rooms, client.RoomId)
+	var newRooms = b.Rooms[client.RoomId][:0]
+	if clients, ok := b.Rooms[client.RoomId]; ok {
+		for _, clientId := range clients {
+			if clientId == client.ClientId {
+				continue
+			}
+			newRooms = append(newRooms, clientId)
+		}
+	}
+	b.Rooms[client.RoomId] = newRooms
 	delete(b.Clients, client.ClientId)
 	return
 }

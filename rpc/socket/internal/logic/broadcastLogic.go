@@ -57,6 +57,7 @@ func (l *BroadcastLogic) Broadcast(in *socket.ReqBroadcastNormal) (res *socket.R
 		Version:      int(in.Version),
 		Operate:      int(in.Operate),
 		Method:       in.Method,
+		SendRoomId:   in.RoomId,
 		SendClientId: in.ToClientId,
 		Extend:       in.Extend,
 		Body:         []byte(in.Event.Params),
@@ -67,6 +68,7 @@ func (l *BroadcastLogic) Broadcast(in *socket.ReqBroadcastNormal) (res *socket.R
 	}
 	// 发布消息，将消息都分发给订阅了的消费者
 	if err = AloneRedisClient.Publish(common.PubSubSocketMessageNormalChannelKey, string(body)).Err(); err != nil {
+		l.Logger.Errorf("%s Broadcast 发布消息 :%s", module, err.Error())
 		res.Code = common.SOCKET_BROADCAST_NORMAL
 		goto result
 	}

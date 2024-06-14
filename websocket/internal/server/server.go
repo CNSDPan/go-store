@@ -6,6 +6,7 @@ import (
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"github.com/zeromicro/go-zero/core/logx"
 	"net/http"
+	"store/common"
 	"store/tools"
 	"store/websocket/internal/types"
 	"strconv"
@@ -21,6 +22,8 @@ const (
 	// OperateConn 建立连接操作
 	OperateConn = 10
 )
+
+var module = "websocket服务下的server"
 
 type Server struct {
 	Buckets       []*Bucket
@@ -94,18 +97,18 @@ func (s *Server) writeChannel(client *Client) {
 			// 每次写之前，都需要设置超时时间，如果只设置一次就会出现总是超时
 			_ = client.Websocket.SetWriteDeadline(time.Now().Add(WriteWait))
 			if !ok {
-				s.Log.Error("server websocket client.Broadcast not ok ")
+				s.Log.Errorf("%s writeChannel <- client.Broadcast not ok ", module)
 				_ = client.Websocket.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 			w, err := client.Websocket.NextWriter(websocket.TextMessage)
 			if err != nil {
-				s.Log.Errorf("server websocket.Conn.NextWriter fail:%s", err.Error())
+				s.Log.Errorf("%s Conn.NextWriter fail:%s", module, err.Error())
 				return
 			}
 			_, _ = w.Write(message.Body)
 			if err = w.Close(); err != nil {
-				s.Log.Errorf("server websocket w.Close() fail:%s", err.Error())
+				s.Log.Errorf("%s w.Close() fail:%s", module, err.Error())
 				return
 			}
 		case <-ticker.C:
@@ -113,7 +116,7 @@ func (s *Server) writeChannel(client *Client) {
 			client.Websocket.SetWriteDeadline(time.Now().Add(PingPeriod))
 			// 心跳检测
 			if err := client.Websocket.WriteMessage(websocket.PingMessage, nil); err != nil {
-				s.Log.Errorf("server websocket.WriteMessage fail:%s", err.Error())
+				s.Log.Errorf("%s WriteMessage fail:%s", module, err.Error())
 				return
 			}
 		}
@@ -134,35 +137,38 @@ func (s *Server) readChannel(client *Client) {
 	defer func() {
 		//移出连接池
 		if client.RoomId == 0 || client.UserId == 0 {
-			s.Log.Infof("server websocket.readChannel client.RoomId || client.UserId eq 0")
+			s.Log.Infof("%s readChannel client.RoomId || client.UserId eq 0", module)
 			_ = client.Websocket.Close()
 			return
 		}
-		s.Log.Infof("server websocket client.UserId:%d disconnect", client.UserId)
+		s.Log.Infof("%s client.UserId:%d RoomId:%d disconnect", module, client.UserId, client.RoomId)
 		s.getBucket(client.RoomId).DelBucket(client)
+		s.Log.Infof("%s disconnect 数量:%d", module, len(s.getBucket(client.RoomId).Rooms[client.RoomId]))
 		// 断连后需要处理其他业务请求grpc
 		s.ClientManager.DisConnect()
 		_ = client.Websocket.Close()
 	}()
 
 	for {
-		_, message, err := client.Websocket.ReadMessage()
+		messageType, message, err := client.Websocket.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				s.Log.Errorf("server websocket.ReadMessage fail:%s", err.Error())
+				s.Log.Errorf("%s ReadMessage fail:%s", module, err.Error())
 				return
 			}
 		}
-		if message == nil {
-			s.Log.Infof("server websocket.ReadMessage message is nil:%v", message)
+		// 断连的messageType为-1
+		if message == nil && messageType == -1 {
+			s.Log.Infof("%s ReadMessage message UserId:%d is nil:%v messageType:%d", module, client.UserId, message, messageType)
 			return
 		}
 		// 将body信息转换成结构
 		var websocketMsg types.ReceiveMsg
 		if err = jsonx.Unmarshal(message, &websocketMsg); err != nil {
-			s.Log.Errorf("server websocket.message json.Unmarshal websocketMsg fail:%s", err.Error())
+			s.Log.Errorf("%s message json.Unmarshal websocketMsg fail:%s", module, err.Error())
 			continue
 		}
+
 		if websocketMsg.FromClientId == "" {
 			websocketMsg.FromClientId = "0"
 		}
@@ -182,21 +188,25 @@ func (s *Server) readChannel(client *Client) {
 		case OperateSingleMsg:
 		case OperateGroupMsg:
 			methodCode, methodMsg, methodErr = s.ClientManager.MethodHandle(websocketMsg, s.Log)
+			if methodCode != common.RESPONSE_SUCCESS {
+				s.Log.Errorf("%s 广播消息 methodCode:%s methodMsg:%s", methodCode, methodMsg)
+			}
 		case OperateConn:
 			// client与server建立websocket成功后，client推送一次操作事件Operate:10，server将其进行连接池分组
 			client.UserId, client.ClientId = s.ClientManager.Connect(client.AutoToken)
 			if client.UserId == 0 {
-				s.Log.Errorf("server websocket ClientManager.Connect user undefined by token:%s", client.AutoToken)
+				s.Log.Errorf("%s ClientManager.Connect user undefined by token:%s", module, client.AutoToken)
 				return
-
 			}
 			// 获取要加入加入池子
 			bucket := s.getBucket(websocketMsg.RoomId)
-			s.Log.Infof("server websocket autoToken:%s bucket.Idx:%d", client.AutoToken, bucket.Idx)
 			bucket.putBucket(client, websocketMsg.RoomId)
 			// 请求grpc广播消息，通知群有用户进入群聊
+			s.Log.Infof(
+				"%s autoToken:%s bucket.Idx:%d bucket.rooms.len:%s client.UserId:%s ",
+				module, client.AutoToken, bucket.Idx, len(bucket.Rooms[client.RoomId]), client.UserId,
+			)
 		}
-		s.Log.Infof("读消息管道：echo websocketMsg.Operate:%d methodCode:%s methodMsg:%s", websocketMsg.Operate, methodCode, methodMsg)
 		if methodErr != nil {
 			s.Log.Errorf("读消息管道：echo websocketMsg.Operate:%d methodErr:%s", websocketMsg.Operate, methodErr.Error())
 		}
@@ -213,6 +223,7 @@ func (s *Server) readSubWriteMsg() {
 	case writeMsg := <-SubWriteMsg:
 		b := s.getBucket(writeMsg.SendRoomId)
 		clients := b.Rooms[writeMsg.SendRoomId]
+		s.Log.Infof("%s readSubWriteMsg b.Idx:%d 池子内连接数 :%d", module, b.Idx, len(clients))
 		for _, clientId := range clients {
 			client, ok := b.Clients[clientId]
 			if ok {
