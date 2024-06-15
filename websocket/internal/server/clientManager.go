@@ -64,7 +64,7 @@ func userTest() map[string]map[string]interface{} {
 // @param：autoToken
 // @return：userId 用户ID
 // @return：ClientId 连接唯一ID
-func (clientM *ClientManager) Connect(autoToken string) (userId int64, clientId int64) {
+func (clientM *ClientManager) Connect(autoToken string) (userId int64, clientId int64, name string) {
 	//请求grpc处理业务，校验用户是否正常的，正常则返回clientId和用户信息等
 
 	// 例子
@@ -73,12 +73,14 @@ func (clientM *ClientManager) Connect(autoToken string) (userId int64, clientId 
 	if user, ok = userMap[autoToken]; !ok {
 		userId = 0
 		clientId = 0
+		name = ""
 	} else {
 		userId, _ = user["userId"].(int64)
 		clientId, _ = user["clientId"].(int64)
+		name, _ = user["name"].(string)
 	}
 
-	return userId, clientId
+	return userId, clientId, name
 }
 
 // DisConnect

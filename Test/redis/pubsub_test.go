@@ -2,35 +2,50 @@ package redis
 
 import (
 	"fmt"
+	"github.com/go-redis/redis"
+	"github.com/zeromicro/go-zero/core/jsonx"
 	"store/common"
 	"store/redis_db"
 	"testing"
 	"time"
 )
 
+type WriteMsg struct {
+	Version      int    `json:"version"`             // 用于区分业务版本号
+	Operate      int    `json:"operate"`             // 操作
+	Method       string `json:"method"`              // 事件
+	SendRoomId   int64  `json:"sendRoomId"`          // 消息发送房间
+	SendClientId int64  `json:"sendClientId,string"` // 消息发送指定人
+	Extend       string `json:"extend"`              // 额外信息
+	Body         []byte `json:"body"`                // 发送的主体内容
+}
+
 func TestAloneRedisPub(t *testing.T) {
 	aloneRedisClient, err := redis_db.NewAloneRedis()
 	if err != nil {
 		panic(err.Error())
 	}
-	for i := 1; i <= 2; i++ {
-		num := i * 10000
-		go func() {
-			num2 := num
-			for {
-				select {
-				case <-time.After(time.Microsecond):
-					num2++
-					if num2 >= num+5000 {
-						return
-					}
-					aloneRedisClient.Publish(common.PubSubSocketMessageNormalChannelKey, fmt.Sprintf("发布消息：%d", num2))
-					fmt.Printf("发布消息 %d", num2)
-				}
+	for {
+		select {
+		case <-time.After(10 * time.Second):
+			tt := time.Now().Format("2006-01-02 15:04:05")
+			writeMsg := WriteMsg{
+				Version:      1,
+				Operate:      3,
+				Method:       "Normal",
+				SendRoomId:   1,
+				SendClientId: 0,
+				Extend:       "",
+				Body:         []byte(tt),
 			}
-		}()
+			if body, err := jsonx.Marshal(writeMsg); err != nil {
+				fmt.Printf("err :%s \r\n ", err.Error())
+			} else {
+				aloneRedisClient.Publish(common.PubSubSocketMessageNormalChannelKey, string(body))
+				fmt.Printf("%s \r\n", tt)
+			}
+		}
 	}
-	select {}
 }
 
 func TestAloneRedisSub(t *testing.T) {
@@ -39,23 +54,106 @@ func TestAloneRedisSub(t *testing.T) {
 		panic(err.Error())
 	}
 	pubSub := aloneRedisClient.Subscribe(common.PubSubSocketMessageNormalChannelKey)
-	if _, err = pubSub.Receive(); err != nil {
-		fmt.Println("pubSub.Receive fail:")
-		_ = pubSub.Close()
+
+	go func() {
+		defer func() {
+			_ = pubSub.Close()
+			panic("停止")
+		}()
+		for {
+			msg, e := pubSub.Receive()
+			if e != nil {
+				fmt.Printf("订阅消息服务 Receive fail:%s", e.Error())
+				break
+			}
+			switch msg.(type) {
+			case *redis.Message:
+				m, ok := msg.(*redis.Message)
+				if !ok {
+					fmt.Printf("订阅消息服务 Receive msg interface to *redis.Message not ok msg:%v \r\n ", msg)
+				} else {
+					var writeMsg WriteMsg
+					b := []byte(m.Payload)
+					if err := jsonx.Unmarshal(b, &writeMsg); err != nil {
+						fmt.Printf("订阅消息服务 Receive Channel:%s json.Unmarshal  fail:%s", m.Channel, err.Error())
+					} else {
+						fmt.Printf("订阅 Payload:%s Channel:%s \r\n ", string(writeMsg.Body), m.Channel)
+					}
+
+				}
+			default:
+				fmt.Printf("订阅消息服务 Receive msg type no *redis.Message msg:%v \r\n ", msg)
+			}
+		}
+	}()
+	select {}
+}
+
+func TestAloneRedisSub2(t *testing.T) {
+	aloneRedisClient, err := redis_db.NewAloneRedis()
+	if err != nil {
 		panic(err.Error())
 	}
-	ch := pubSub.Channel()
-	//for {
-	//	select {
-	//	case msg := <-ch:
-	//		fmt.Printf("msg:%v chann:%v stirng:%v \r\n ", msg.Payload, msg.Channel, msg.String())
-	//	case <-time.After(5 * time.Second):
-	//		e := pubSub.Ping()
-	//		fmt.Printf("%s ping %v \r\n ", time.Now().Format("2006-01-02 15:04:05"), e)
-	//	}
-	//}
+	pubSub := aloneRedisClient.Subscribe(common.PubSubSocketMessageNormalChannelKey)
 
-	for msg := range ch {
-		fmt.Printf("msg:%v chann:%v stirng:%v \r\n ", msg.Payload, msg.Channel, msg.String())
+	go func() {
+		defer func() {
+			_ = pubSub.Close()
+			panic("停止")
+		}()
+		for {
+			msg, e := pubSub.Receive()
+			if e != nil {
+				fmt.Printf("订阅消息服务 Receive fail:%s", e.Error())
+				break
+			}
+			switch msg.(type) {
+			case *redis.Message:
+				m, ok := msg.(*redis.Message)
+				if !ok {
+					fmt.Printf("订阅消息服务 Receive msg interface to *redis.Message not ok msg:%v \r\n ", msg)
+				} else {
+					var writeMsg WriteMsg
+					b := []byte(m.Payload)
+					if err := jsonx.Unmarshal(b, &writeMsg); err != nil {
+						fmt.Printf("订阅消息服务 Receive Channel:%s json.Unmarshal  fail:%s", m.Channel, err.Error())
+					} else {
+						fmt.Printf("订阅222 Payload:%s Channel:%s \r\n ", string(writeMsg.Body), m.Channel)
+					}
+
+				}
+			default:
+				fmt.Printf("订阅消息服务 Receive msg type no *redis.Message msg:%v \r\n ", msg)
+			}
+		}
+	}()
+	select {}
+}
+
+func TestAloneRedisSub3(t *testing.T) {
+	aloneRedisClient, err := redis_db.NewAloneRedis()
+	if err != nil {
+		panic(err.Error())
 	}
+
+	pubSub := aloneRedisClient.Subscribe(common.PubSubSocketMessageNormalChannelKey)
+	defer pubSub.Close()
+	if _, err := pubSub.Receive(); err != nil {
+		fmt.Printf(err.Error())
+		return
+	}
+	go func() {
+		ch := pubSub.Channel()
+		for msg := range ch {
+			var writeMsg WriteMsg
+			b := []byte(msg.Payload)
+			if err := jsonx.Unmarshal(b, &writeMsg); err != nil {
+				fmt.Printf("订阅消息服务 Receive Channel:%s json.Unmarshal  fail:%s", msg.Channel, err.Error())
+			} else {
+				fmt.Printf("订阅3333 Payload:%s Channel:%s \r\n ", string(writeMsg.Body), msg.Channel)
+			}
+		}
+	}()
+
+	select {}
 }

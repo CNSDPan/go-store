@@ -193,7 +193,7 @@ func (s *Server) readChannel(client *Client) {
 			}
 		case OperateConn:
 			// client与server建立websocket成功后，client推送一次操作事件Operate:10，server将其进行连接池分组
-			client.UserId, client.ClientId = s.ClientManager.Connect(client.AutoToken)
+			client.UserId, client.ClientId, client.Name = s.ClientManager.Connect(client.AutoToken)
 			if client.UserId == 0 {
 				s.Log.Errorf("%s ClientManager.Connect user undefined by token:%s", module, client.AutoToken)
 				return
@@ -203,8 +203,8 @@ func (s *Server) readChannel(client *Client) {
 			bucket.putBucket(client, websocketMsg.RoomId)
 			// 请求grpc广播消息，通知群有用户进入群聊
 			s.Log.Infof(
-				"%s autoToken:%s bucket.Idx:%d bucket.rooms.len:%s client.UserId:%s ",
-				module, client.AutoToken, bucket.Idx, len(bucket.Rooms[client.RoomId]), client.UserId,
+				"%s 进群了:Idx:%v、rooms.len:%v",
+				client.Name, bucket.Idx, len(bucket.Rooms[client.RoomId]),
 			)
 		}
 		if methodErr != nil {
@@ -219,15 +219,16 @@ func (s *Server) readChannel(client *Client) {
 // @Date：2024-06-12 18:05:19
 // @receiver：s
 func (s *Server) readSubWriteMsg() {
-	select {
-	case writeMsg := <-SubWriteMsg:
-		b := s.getBucket(writeMsg.SendRoomId)
-		clients := b.Rooms[writeMsg.SendRoomId]
-		s.Log.Infof("%s readSubWriteMsg b.Idx:%d 池子内连接数 :%d", module, b.Idx, len(clients))
-		for _, clientId := range clients {
-			client, ok := b.Clients[clientId]
-			if ok {
-				client.Broadcast <- writeMsg
+	for {
+		select {
+		case writeMsg := <-SubWriteMsg:
+			b := s.getBucket(writeMsg.SendRoomId)
+			clients := b.Rooms[writeMsg.SendRoomId]
+			for _, clientId := range clients {
+				client, ok := b.Clients[clientId]
+				if ok {
+					client.Broadcast <- writeMsg
+				}
 			}
 		}
 	}

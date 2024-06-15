@@ -77,15 +77,14 @@ func main() {
 		},
 	})
 
-	// 初始化订阅redis
+	// 初始化redis订阅者
 	var subscribeServer *server.Subscribe
 	subscribeServer, err = server.NewSubscribe()
 	if err != nil {
-		panic("服务-websocket NewSubscribe fail:" + err.Error())
+		panic("服务-websocket NewSubscribe 启动失败，无法连接:" + err.Error())
 	}
 	subscribeServer.Log = l
 	subscribeServer.SubReceive()
-
 	fmt.Println(fmt.Sprintf("Starting websocket server at %s:%d...\n", c.Host, c.Port))
 	s.Start()
 }

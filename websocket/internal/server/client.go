@@ -8,6 +8,7 @@ import (
 
 type Client struct {
 	AutoToken   string
+	Name        string
 	ClientId    int64
 	Websocket   *websocket.Conn
 	ConnectTime uint64

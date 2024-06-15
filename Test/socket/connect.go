@@ -5,7 +5,6 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/zeromicro/go-zero/core/jsonx"
 	"log"
-	"strconv"
 )
 
 type TestClient struct {
@@ -113,17 +112,16 @@ func (t *TestClient) Send() {
 func (t *TestClient) Read() {
 	go func() {
 		var (
-			mType int
-			err   error
-			b     []byte
+			err error
+			b   []byte
 		)
 		for {
-			mType, b, err = t.Conn.ReadMessage()
+			_, b, err = t.Conn.ReadMessage()
 			if err != nil {
 				t.recvMsgChan <- "读取失败：" + err.Error()
 				break
 			}
-			t.recvMsgChan <- "读取 " + strconv.Itoa(mType) + string(b)
+			t.recvMsgChan <- string(b)
 		}
 	}()
 }
