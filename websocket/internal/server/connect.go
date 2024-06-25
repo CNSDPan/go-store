@@ -61,7 +61,7 @@ func (c *Connect) Run(w http.ResponseWriter, r *http.Request, webServer *Server)
 	clientChannel := NewClient(wsConn)
 
 	go webServer.readSubWriteMsg()
+	go webServer.readSubWriteMsgBySingle()
 	go webServer.writeChannel(clientChannel)
 	go webServer.readChannel(clientChannel)
-
 }

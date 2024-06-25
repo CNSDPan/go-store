@@ -159,15 +159,16 @@ func (clientM *ClientManager) MethodHandle(msg types.ReceiveMsg, l logx.Logger) 
 	var (
 		fromClientId int64
 		toClientId   int64
-		res          *socket.ResSuccess
+		req          = &socket.ReqBroadcastNormal{}
+		res          = &socket.ResSuccess{}
 	)
 	defer func() {
 		if err != nil {
 			code = common.RESPONSE_FAIL
 			message = common.ReturnCodeMessage()[code]
 		} else {
-			code = "200"
-			message = ""
+			code = res.Code
+			message = res.Msg
 		}
 	}()
 	if fromClientId, err = strconv.ParseInt(msg.FromClientId, 10, 64); err != nil {
@@ -176,8 +177,25 @@ func (clientM *ClientManager) MethodHandle(msg types.ReceiveMsg, l logx.Logger) 
 	if toClientId, err = strconv.ParseInt(msg.ToClientId, 10, 64); err != nil {
 		goto EndHandle
 	}
+
+	req = &socket.ReqBroadcastNormal{
+		Version:      int32(msg.Version),
+		Operate:      int32(msg.Operate),
+		Method:       msg.Method,
+		RoomId:       msg.RoomId,
+		FromClientId: fromClientId,
+		ToClientId:   toClientId,
+		Msg:          "",
+		Extend:       msg.Extend,
+		AutoToken:    msg.AuthToken,
+		FromUserName: msg.FromUserName,
+		ToUserName:   msg.FromUserName,
+	}
 	switch msg.Method {
 	case "Enter":
+		req.ToClientId = fromClientId
+		req.Event = &socket.EventNormal{Params: msg.FromUserName + " 进来了"}
+		res, err = GrpcSocketClient.Broadcast(context.Background(), req)
 	case "Out":
 	case "Normal":
 		params, ok := msg.Event.Params.(string)
@@ -185,19 +203,8 @@ func (clientM *ClientManager) MethodHandle(msg types.ReceiveMsg, l logx.Logger) 
 			err = errors.New("msg.Event.Params interface to string not ok")
 			goto EndHandle
 		}
-		res, err = GrpcSocketClient.Broadcast(context.Background(), &socket.ReqBroadcastNormal{
-			Version:      int32(msg.Version),
-			Operate:      int32(msg.Operate),
-			Method:       msg.Method,
-			Event:        &socket.EventNoraml{Params: params},
-			RoomId:       msg.RoomId,
-			FromClientId: fromClientId,
-			ToClientId:   toClientId,
-			Msg:          "",
-			Extend:       msg.Extend,
-			AutoToken:    msg.AuthToken,
-		})
-	case "Server":
+		req.Event = &socket.EventNormal{Params: params}
+		res, err = GrpcSocketClient.Broadcast(context.Background(), req)
 	default:
 		res.Code = common.RESPONSE_FAIL
 		res.Msg = "无效操作"

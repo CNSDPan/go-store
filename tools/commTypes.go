@@ -1,0 +1,10 @@
+package tools
+
+const (
+	//OPERATE_SINGLE_MSG 单人聊天操作
+	OPERATE_SINGLE_MSG = 2
+	// OPERATE_GROUP_MSG 群体聊天操作
+	OPERATE_GROUP_MSG = 3
+	// OPERATE_CONN_MSG 建立连接操作
+	OPERATE_CONN_MSG = 10
+)

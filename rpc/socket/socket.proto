@@ -11,7 +11,7 @@ message ResPong {
   string pong = 1;
 }
 
-message EventNoraml {
+message EventNormal {
   string params = 1;
 }
 
@@ -20,13 +20,15 @@ message ReqBroadcastNormal {
   int32 version = 1;
   int32 operate = 2;
   string method = 3;
-  EventNoraml event = 4;
+  EventNormal event = 4;
   int64 roomId = 5;
   int64 fromClientId = 6;
   int64 toClientId = 7;
   string msg = 8;
   string extend = 9;
   string autoToken = 10;
+  string fromUserName = 11;
+  string toUserName = 12;
 }
 
 message ResSuccess {

@@ -6,6 +6,7 @@ services:
     container_name: etcd1
     environment:
       - TZ=Asia/Shanghai
+      - LANG=${LANG}
       - ALLOW_NONE_AUTHENTICATION=yes
       - ETCD_NAME=etcd1
       - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd1:2380 #暴露这个成员的url，以便通告给集群中的其他成员
@@ -29,6 +30,7 @@ services:
     container_name: etcd2
     environment:
       - TZ=Asia/Shanghai
+      - LANG=${LANG}
       - ALLOW_NONE_AUTHENTICATION=yes
       - ETCD_NAME=etcd2
       - ETCD_INITIAL_ADVERTISE_PEER_URLS=http://etcd2:2380 #暴露这个成员的url，以便通告给集群中的其他成员

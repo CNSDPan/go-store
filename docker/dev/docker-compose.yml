@@ -3,7 +3,7 @@ version: "3.5"
 services:
   go1.19:
     container_name: go1.19
-    image: go1.19-build
+    image: go1.19-build-v2
 #    build:
 #      context: .
 #      dockerfile: Dockerfile
@@ -24,6 +24,7 @@ services:
       - "8881:8080"
     environment:
       - TZ=${TZ}
+      - LANG=${LANG}
     volumes:
       - ${APP_PATH}/rpc/api/bin/rpc_api.bin:${MOUNT_PATH}/rpc_api.bin
       - ${APP_PATH}/rpc/api/etc:${MOUNT_PATH}/etc
@@ -41,6 +42,7 @@ services:
       - "8882:8080"
     environment:
       - TZ=${TZ}
+      - LANG=${LANG}
     volumes:
       - ${APP_PATH}/rpc/socket/bin/rpc_socket.bin:${MOUNT_PATH}/rpc_socket.bin
       - ${APP_PATH}/rpc/socket/etc:${MOUNT_PATH}/etc
@@ -62,6 +64,7 @@ services:
       - "7000:8888"
     environment:
       - TZ=${TZ}
+      - LANG=${LANG}
     volumes:
       - ${APP_PATH}/api/bin/api.bin:${MOUNT_PATH}/api.bin
       - ${APP_PATH}/api/etc:${MOUNT_PATH}/etc
@@ -83,6 +86,7 @@ services:
       - "6991:8888"
     environment:
       - TZ=${TZ}
+      - LANG=${LANG}
     volumes:
       - ${APP_PATH}/websocket/bin/websocket.bin:${MOUNT_PATH}/websocket.bin
       - ${APP_PATH}/websocket/etc:${MOUNT_PATH}/etc

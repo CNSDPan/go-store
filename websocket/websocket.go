@@ -85,6 +85,7 @@ func main() {
 	}
 	subscribeServer.Log = l
 	subscribeServer.SubReceive()
+	subscribeServer.EnterSubReceive()
 	fmt.Println(fmt.Sprintf("Starting websocket server at %s:%d...\n", c.Host, c.Port))
 	s.Start()
 }

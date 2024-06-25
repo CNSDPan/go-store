@@ -64,7 +64,7 @@ func (t *TestClient) Auth(authToken string) error {
 	msg := ReceiveMsg{
 		Version:   1,
 		Operate:   10,
-		Method:    "client",
+		Method:    "Enter",
 		RoomId:    1,
 		Msg:       "",
 		AuthToken: authToken,
@@ -121,7 +121,7 @@ func (t *TestClient) Read() {
 				t.recvMsgChan <- "读取失败：" + err.Error()
 				break
 			}
-			t.recvMsgChan <- string(b)
+			t.recvMsgChan <- "read: " + string(b)
 		}
 	}()
 }

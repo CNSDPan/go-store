@@ -14,15 +14,6 @@ import (
 	"time"
 )
 
-const (
-	// OperateSingleMsg 单人聊天操作
-	OperateSingleMsg = 2
-	// OperateGroupMsg 群体聊天操作
-	OperateGroupMsg = 3
-	// OperateConn 建立连接操作
-	OperateConn = 10
-)
-
 var module = "websocket服务下的server"
 
 type Server struct {
@@ -177,21 +168,23 @@ func (s *Server) readChannel(client *Client) {
 		}
 		client.AutoToken = websocketMsg.AuthToken
 		client.RoomId = websocketMsg.RoomId
-
+		if client.ClientId != 0 {
+			websocketMsg.FromClientId = strconv.FormatInt(client.ClientId, 10)
+			websocketMsg.FromUserName = client.Name
+		}
 		client.Websocket.SetReadLimit(MaxMessageSize)
 		_ = client.Websocket.SetReadDeadline(time.Now().Add(ReadWait))
 		client.Websocket.SetPongHandler(func(string) error {
 			_ = client.Websocket.SetReadDeadline(time.Now().Add(PongPeriod))
 			return nil
 		})
+
 		switch websocketMsg.Operate {
-		case OperateSingleMsg:
-		case OperateGroupMsg:
+		case tools.OPERATE_SINGLE_MSG:
+		case tools.OPERATE_GROUP_MSG:
 			methodCode, methodMsg, methodErr = s.ClientManager.MethodHandle(websocketMsg, s.Log)
-			if methodCode != common.RESPONSE_SUCCESS {
-				s.Log.Errorf("%s 广播消息 methodCode:%s methodMsg:%s", methodCode, methodMsg)
-			}
-		case OperateConn:
+
+		case tools.OPERATE_CONN_MSG:
 			// client与server建立websocket成功后，client推送一次操作事件Operate:10，server将其进行连接池分组
 			client.UserId, client.ClientId, client.Name = s.ClientManager.Connect(client.AutoToken)
 			if client.UserId == 0 {
@@ -206,6 +199,12 @@ func (s *Server) readChannel(client *Client) {
 				"%s 进群了:Idx:%v、rooms.len:%v",
 				client.Name, bucket.Idx, len(bucket.Rooms[client.RoomId]),
 			)
+			websocketMsg.FromClientId = strconv.FormatInt(client.ClientId, 10)
+			websocketMsg.FromUserName = client.Name
+			methodCode, methodMsg, methodErr = s.ClientManager.MethodHandle(websocketMsg, s.Log)
+		}
+		if methodCode != common.RESPONSE_SUCCESS {
+			s.Log.Errorf("%s 广播消息 methodCode:%s methodMsg:%s", methodCode, methodMsg)
 		}
 		if methodErr != nil {
 			s.Log.Errorf("读消息管道：echo websocketMsg.Operate:%d methodErr:%s", websocketMsg.Operate, methodErr.Error())
@@ -229,6 +228,24 @@ func (s *Server) readSubWriteMsg() {
 				if ok {
 					client.Broadcast <- writeMsg
 				}
+			}
+		}
+	}
+}
+
+// readSubWriteMsgBySingle
+// @Auth：
+// @Desc：处理消息，并发送给房间的指定人
+// @Date：2024-06-25 11:28:00
+// @receiver：s
+func (s *Server) readSubWriteMsgBySingle() {
+	for {
+		select {
+		case writeMsg := <-SubWriteMsgBySingle:
+			b := s.getBucket(writeMsg.SendRoomId)
+			client, ok := b.Clients[writeMsg.SendClientId]
+			if ok {
+				client.Broadcast <- writeMsg
 			}
 		}
 	}

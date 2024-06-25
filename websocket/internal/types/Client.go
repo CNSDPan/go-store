@@ -19,17 +19,19 @@ type WriteMsg struct {
 // @Desc：客户端websocket推送到服务端的消息
 // @Date：2024-05-23 17:28:07
 type ReceiveMsg struct {
-	Version      int    `json:"version"`         // 用于区分业务版本号
-	Operate      int    `json:"operate"`         // 操作
-	Method       string `json:"method"`          // 事件
-	Event        Event  `json:"event,omitempty"` // 请求&响应参数
-	StoreId      int64  `json:"storeId,string"`  //
-	RoomId       int64  `json:"roomId,string"`   //
-	FromClientId string `json:"fromClientId"`    // 消息发送人
-	ToClientId   string `json:"toClientId"`      // 消息发送指定人
-	Msg          string `json:"msg"`             //
-	Extend       string `json:"extend"`          // 额外信息
-	AuthToken    string `json:"authToken,omitempty"`
+	Version      int    `json:"version"`             // 用于区分业务版本号
+	Operate      int    `json:"operate"`             // 操作
+	Method       string `json:"method"`              // 事件
+	Event        Event  `json:"event,omitempty"`     // 请求&响应参数
+	StoreId      int64  `json:"storeId,string"`      //
+	RoomId       int64  `json:"roomId,string"`       //
+	FromClientId string `json:"fromClientId"`        // 消息发送人
+	ToClientId   string `json:"toClientId"`          // 消息发送指定人
+	Msg          string `json:"msg"`                 //
+	Extend       string `json:"extend"`              // 额外信息
+	AuthToken    string `json:"authToken,omitempty"` // token
+	FromUserName string `json:"fromUserName"`        // 发送人
+	ToUserName   string `json:"toUserName"`          // 指定人
 }
 
 type Event struct {

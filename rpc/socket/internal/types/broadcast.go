@@ -13,3 +13,15 @@ type WriteMsg struct {
 	Extend       string `json:"extend"`              // 额外信息
 	Body         []byte `json:"body"`                // 发送的主体内容
 }
+
+// WriteMsgBody
+// @Auth：
+// @Desc：广播消息的Body结构体
+// @Date：2024-06-25 15:58:55
+type WriteMsgBody struct {
+	Version int    `json:"version"` // 用于区分业务版本号
+	Operate int    `json:"operate"` // 操作
+	Method  string `json:"method"`  // 事件
+	Params  interface{}
+	Data    interface{}
+}

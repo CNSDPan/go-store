@@ -13,7 +13,7 @@ import (
 )
 
 type (
-	EventNoraml        = socket.EventNoraml
+	EventNormal        = socket.EventNormal
 	ReqBroadcastNormal = socket.ReqBroadcastNormal
 	ReqPing            = socket.ReqPing
 	ResPong            = socket.ResPong
